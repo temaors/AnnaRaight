@@ -1,0 +1,20 @@
+# Игнорировать при деплое
+node_modules/
+.next/
+.env.local
+.env.development
+*.log
+*.tmp
+*.bak
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.zip
+*.tar.gz
+
+# Тестовые файлы
+test-*
+debug-*
+*test*.py
+*debug*.py

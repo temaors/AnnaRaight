@@ -1,0 +1,24 @@
+import { updateSession } from "@/lib/sqlite/middleware";
+import { type NextRequest } from "next/server";
+
+export async function middleware(request: NextRequest) {
+  return await updateSession(request);
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - api routes
+     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+     * - videos - .mp4, .webm, .ogg
+     * - funnel pages
+     * - test pages
+     * Feel free to modify this pattern to include more paths.
+     */
+    "/((?!_next/static|_next/image|favicon.ico|api|funnel|test-video|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm|ogg)$).*)",
+  ],
+};
