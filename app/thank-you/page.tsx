@@ -13,6 +13,45 @@ function ConfirmedPageContent() {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const supabase = useMemo(() => createClient(), []);
+  const [pageLoaded, setPageLoaded] = useState(false);
+
+  // Force page reload if loaded from cache (bfcache)
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        // Page was loaded from bfcache (back-forward cache)
+        console.log('Page loaded from cache, forcing reload...');
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, []);
+
+  // Force fresh page load by adding timestamp to URL if it's not already present
+  useEffect(() => {
+    if (pageLoaded) return; // Prevent infinite loop
+
+    const currentUrl = new URL(window.location.href);
+    const hasTimestamp = currentUrl.searchParams.has('_t');
+    const hasCalendlyParams = currentUrl.searchParams.has('assigned_to') ||
+                              currentUrl.searchParams.has('event_type_uuid') ||
+                              currentUrl.searchParams.has('invitee_email');
+
+    // If Calendly redirected us here (has Calendly params) but no timestamp, add it and reload
+    if (hasCalendlyParams && !hasTimestamp) {
+      console.log('Calendly redirect detected, adding timestamp to force fresh load...');
+      currentUrl.searchParams.set('_t', Date.now().toString());
+      window.location.replace(currentUrl.toString());
+      return;
+    }
+
+    setPageLoaded(true);
+  }, [pageLoaded]);
 
   // Video data with direct S3 URLs - memoized to prevent re-renders
   const testimonialVideos = useMemo(() => [
@@ -1629,24 +1668,18 @@ function ConfirmedPageContent() {
   );
 }
 
+// Version number - increment this when you make changes
+const PAGE_VERSION = '2.0.0';
+
 export default function ConfirmedPage() {
   return (
-    <>
-      <head>
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta httpEquiv="Pragma" content="no-cache" />
-        <meta httpEquiv="Expires" content="0" />
-        <meta name="cache-control" content="no-cache" />
-        <meta name="timestamp" content={Date.now().toString()} />
-      </head>
-      <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>}>
-        <ConfirmedPageContent />
-      </Suspense>
-    </>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>}>
+      <ConfirmedPageContent />
+    </Suspense>
   );
 }

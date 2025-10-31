@@ -9,22 +9,22 @@ const authRoutes = ['/auth/login', '/auth/sign-up'];
 
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Skip middleware for test-login page
   if (pathname === '/test-login') {
     return NextResponse.next();
   }
-  
+
   // Check if route requires authentication
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-  
+
   // Get access token from cookie
   const accessToken = request.cookies.get('access_token')?.value;
-  
+
   // Simple check - if token exists, user is authenticated
   const isAuthenticated = !!accessToken;
-  
+
   console.log('Middleware check:', {
     pathname,
     isProtectedRoute,
@@ -32,18 +32,27 @@ export async function updateSession(request: NextRequest) {
     hasToken: !!accessToken,
     isAuthenticated
   });
-  
+
   // Redirect logic
   if (isProtectedRoute && !isAuthenticated) {
     // Redirect to login if trying to access protected route without auth
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
-  
+
   if (isAuthRoute && isAuthenticated) {
     // Redirect to admin if trying to access auth routes while authenticated
     return NextResponse.redirect(new URL('/admin/leads', request.url));
   }
-  
+
+  // Add no-cache headers for thank-you page to prevent showing cached version
+  const response = NextResponse.next();
+
+  if (pathname === '/thank-you') {
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+  }
+
   // Continue with the request
-  return NextResponse.next();
+  return response;
 }
