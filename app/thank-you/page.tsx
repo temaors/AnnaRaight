@@ -162,7 +162,8 @@ function ConfirmedPageContent() {
       duration: 0,
       isMuted: false,
       isPreview: false,
-      isDragging: false
+      isDragging: false,
+      isLoading: true
     });
     
     const effectiveDuration = localState.duration || (videoRef.current?.duration || 0);
@@ -478,6 +479,7 @@ function ConfirmedPageContent() {
         <video
           ref={videoRef}
           src={videoSrc}
+          poster="/speaker.jpg"
           preload="metadata"
           playsInline
           className="w-full h-full object-contain"
@@ -516,11 +518,29 @@ function ConfirmedPageContent() {
           }}
           onLoadedData={() => {
             console.log('Video loaded successfully for', videoId);
+            setLocalState(prev => ({ ...prev, isLoading: false }));
+          }}
+          onLoadStart={() => {
+            console.log('Video loading started for', videoId);
+            setLocalState(prev => ({ ...prev, isLoading: true }));
+          }}
+          onWaiting={() => {
+            setLocalState(prev => ({ ...prev, isLoading: true }));
+          }}
+          onCanPlay={() => {
+            setLocalState(prev => ({ ...prev, isLoading: false }));
           }}
         />
 
+        {/* Loading Spinner */}
+        {localState.isLoading && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 60000 }}>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent"></div>
+          </div>
+        )}
+
         {/* Center Play Button - Visible for all videos */}
-        {(!localState.isPlaying || localState.isPreview) && (
+        {(!localState.isPlaying || localState.isPreview) && !localState.isLoading && (
           <div
             onClick={(e) => {
               e.preventDefault();

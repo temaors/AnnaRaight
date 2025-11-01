@@ -32,7 +32,8 @@ export default function WatchPage() {
       duration: 0,
       isMuted: false,
       isPreview: false,
-      lastPlaybackPosition: 0
+      lastPlaybackPosition: 0,
+      isLoading: true
     });
     
     const progressPercentage = localState.duration > 0 ? (localState.currentTime / localState.duration) * 100 : 0;
@@ -226,11 +227,29 @@ export default function WatchPage() {
           }}
           onLoadedData={() => {
             console.log('Video loaded successfully for main video');
+            setLocalState(prev => ({ ...prev, isLoading: false }));
+          }}
+          onLoadStart={() => {
+            console.log('Video loading started');
+            setLocalState(prev => ({ ...prev, isLoading: true }));
+          }}
+          onWaiting={() => {
+            setLocalState(prev => ({ ...prev, isLoading: true }));
+          }}
+          onCanPlay={() => {
+            setLocalState(prev => ({ ...prev, isLoading: false }));
           }}
         />
 
+        {/* Loading Spinner */}
+        {localState.isLoading && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 60000 }}>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent"></div>
+          </div>
+        )}
+
         {/* Center Play Button - Visible when not playing full video or during preview */}
-        {(!localState.isPlaying || localState.isPreview) && (
+        {(!localState.isPlaying || localState.isPreview) && !localState.isLoading && (
           <div
             onClick={(e) => {
               e.preventDefault();
@@ -453,8 +472,8 @@ export default function WatchPage() {
           <div className="max-w-4xl mx-auto mb-8">
             <div className="overflow-hidden">
               <div className="relative bg-black rounded-2xl md:border-8 md:border-gray-900 overflow-hidden">
-                <CustomVideoPlayer 
-                  videoSrc="https://astroforyou.s3.us-east-2.amazonaws.com/ANNA+RAIGHT+VSL+V3.mp4"
+                <CustomVideoPlayer
+                  videoSrc="/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FANNA%2BRAIGHT%2BVSL%2BV3.mp4"
                   className="w-full h-full"
                 />
               </div>
