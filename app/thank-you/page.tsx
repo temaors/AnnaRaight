@@ -623,15 +623,61 @@ function ConfirmedPageContent() {
                   )}
                 </button>
 
-                <button 
+                <button
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     if (videoRef.current) {
-                      if (document.fullscreenElement) {
-                        document.exitFullscreen();
+                      const video = videoRef.current as any;
+
+                      // Check if we're on iOS Safari
+                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+                      if (isIOS) {
+                        // iOS Safari requires webkitEnterFullscreen on the video element
+                        if (video.webkitEnterFullscreen) {
+                          try {
+                            video.webkitEnterFullscreen();
+                          } catch (err) {
+                            console.log('iOS fullscreen error:', err);
+                          }
+                        } else if (video.webkitRequestFullscreen) {
+                          video.webkitRequestFullscreen();
+                        }
                       } else {
-                        videoRef.current.requestFullscreen().catch(() => {});
+                        // Standard fullscreen API for other browsers
+                        const isCurrentlyFullscreen = !!(
+                          document.fullscreenElement ||
+                          (document as any).webkitFullscreenElement ||
+                          (document as any).msFullscreenElement ||
+                          (document as any).mozFullScreenElement
+                        );
+
+                        if (isCurrentlyFullscreen) {
+                          // Exit fullscreen with cross-browser support
+                          if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                          } else if ((document as any).webkitExitFullscreen) {
+                            (document as any).webkitExitFullscreen();
+                          } else if ((document as any).msExitFullscreen) {
+                            (document as any).msExitFullscreen();
+                          } else if ((document as any).mozCancelFullScreen) {
+                            (document as any).mozCancelFullScreen();
+                          }
+                        } else {
+                          // Enter fullscreen with cross-browser support
+                          if (video.requestFullscreen) {
+                            video.requestFullscreen().catch(err => {
+                              console.log('Fullscreen error:', err);
+                            });
+                          } else if (video.webkitRequestFullscreen) {
+                            video.webkitRequestFullscreen();
+                          } else if (video.msRequestFullscreen) {
+                            video.msRequestFullscreen();
+                          } else if (video.mozRequestFullScreen) {
+                            video.mozRequestFullScreen();
+                          }
+                        }
                       }
                     }
                   }}

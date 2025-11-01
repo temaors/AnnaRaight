@@ -321,41 +321,60 @@ export default function WatchPage() {
                 )}
               </button>
               
-              <button 
+              <button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   if (videoRef.current) {
-                    const isCurrentlyFullscreen = !!(
-                      document.fullscreenElement ||
-                      (document as any).webkitFullscreenElement ||
-                      (document as any).msFullscreenElement ||
-                      (document as any).mozFullScreenElement
-                    );
-                    
-                    if (isCurrentlyFullscreen) {
-                      // Exit fullscreen with cross-browser support
-                      if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                      } else if ((document as any).webkitExitFullscreen) {
-                        (document as any).webkitExitFullscreen();
-                      } else if ((document as any).msExitFullscreen) {
-                        (document as any).msExitFullscreen();
-                      } else if ((document as any).mozCancelFullScreen) {
-                        (document as any).mozCancelFullScreen();
+                    const video = videoRef.current as any;
+
+                    // Check if we're on iOS Safari
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+                    if (isIOS) {
+                      // iOS Safari requires webkitEnterFullscreen on the video element
+                      if (video.webkitEnterFullscreen) {
+                        try {
+                          video.webkitEnterFullscreen();
+                        } catch (err) {
+                          console.log('iOS fullscreen error:', err);
+                        }
+                      } else if (video.webkitRequestFullscreen) {
+                        video.webkitRequestFullscreen();
                       }
                     } else {
-                      // Enter fullscreen with cross-browser support
-                      if (videoRef.current.requestFullscreen) {
-                        videoRef.current.requestFullscreen().catch(err => {
-                          console.log('Fullscreen error:', err);
-                        });
-                      } else if ((videoRef.current as any).webkitRequestFullscreen) {
-                        (videoRef.current as any).webkitRequestFullscreen();
-                      } else if ((videoRef.current as any).msRequestFullscreen) {
-                        (videoRef.current as any).msRequestFullscreen();
-                      } else if ((videoRef.current as any).mozRequestFullScreen) {
-                        (videoRef.current as any).mozRequestFullScreen();
+                      // Standard fullscreen API for other browsers
+                      const isCurrentlyFullscreen = !!(
+                        document.fullscreenElement ||
+                        (document as any).webkitFullscreenElement ||
+                        (document as any).msFullscreenElement ||
+                        (document as any).mozFullScreenElement
+                      );
+
+                      if (isCurrentlyFullscreen) {
+                        // Exit fullscreen with cross-browser support
+                        if (document.exitFullscreen) {
+                          document.exitFullscreen();
+                        } else if ((document as any).webkitExitFullscreen) {
+                          (document as any).webkitExitFullscreen();
+                        } else if ((document as any).msExitFullscreen) {
+                          (document as any).msExitFullscreen();
+                        } else if ((document as any).mozCancelFullScreen) {
+                          (document as any).mozCancelFullScreen();
+                        }
+                      } else {
+                        // Enter fullscreen with cross-browser support
+                        if (video.requestFullscreen) {
+                          video.requestFullscreen().catch(err => {
+                            console.log('Fullscreen error:', err);
+                          });
+                        } else if (video.webkitRequestFullscreen) {
+                          video.webkitRequestFullscreen();
+                        } else if (video.msRequestFullscreen) {
+                          video.msRequestFullscreen();
+                        } else if (video.mozRequestFullScreen) {
+                          video.mozRequestFullScreen();
+                        }
                       }
                     }
                   }
