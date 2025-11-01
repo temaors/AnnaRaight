@@ -252,8 +252,12 @@ function ConfirmedPageContent() {
         if (video.paused || localState.isPreview) {
           // Stop any preview mode
           isPreviewActiveRef.current = false;
+          if (previewTimerRef.current) {
+            clearTimeout(previewTimerRef.current);
+            previewTimerRef.current = null;
+          }
           setLocalState(prev => ({ ...prev, isPreview: false }));
-          
+
           // Set start time if specified
           const baseId = videoId.split('-')[0];
           const videoData = testimonialVideos.find(v => v.id === baseId);
