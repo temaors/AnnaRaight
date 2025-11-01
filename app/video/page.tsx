@@ -186,7 +186,7 @@ export default function WatchPage() {
           poster="/speaker.jpg"
           preload="metadata"
           playsInline
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           style={{ pointerEvents: 'none' }}
           onTimeUpdate={() => {
             if (videoRef.current) {
@@ -491,8 +491,8 @@ export default function WatchPage() {
             <p>© 2025 AstroForYou. All rights reserved.</p>
             
             <div className="flex justify-center space-x-6 mt-4">
-              <a href="/privacy-policy" className="hover:text-gray-700">Privacy Policy</a>
-              <a href="/terms/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700">Terms & Conditions</a>
+            <a href="/privacy-policy" className="hover:text-gray-700">Privacy Policy</a>
+              <a href="/terms" className="hover:text-gray-700">Terms & Conditions</a>
               <a href="/disclaimer" className="hover:text-gray-700">Disclaimer</a>
             </div>
             

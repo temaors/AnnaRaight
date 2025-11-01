@@ -480,7 +480,7 @@ function ConfirmedPageContent() {
           src={videoSrc}
           preload="metadata"
           playsInline
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           style={{ pointerEvents: 'none' }}
           onTimeUpdate={() => {
             if (videoRef.current) {
@@ -1614,7 +1614,7 @@ function ConfirmedPageContent() {
             
             <div className="flex justify-center space-x-6 mt-4">
               <a href="/privacy-policy" className="hover:text-gray-700">Privacy Policy</a>
-              <a href="/terms-conditions.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700">Terms & Conditions</a>
+              <a href="/terms" className="hover:text-gray-700">Terms & Conditions</a>
               <a href="/disclaimer" className="hover:text-gray-700">Disclaimer</a>
             </div>
             
