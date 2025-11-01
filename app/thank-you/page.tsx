@@ -145,11 +145,12 @@ function ConfirmedPageContent() {
   };
 
   // Custom Video Player Component with local state
-  const CustomVideoPlayer = ({ videoSrc, startTime = 0, videoId, className = "" }: {
+  const CustomVideoPlayer = ({ videoSrc, startTime = 0, videoId, className = "", autoPreload = false }: {
     videoSrc: string;
     startTime?: number;
     videoId: string;
     className?: string;
+    autoPreload?: boolean;
   }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const previewTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -171,10 +172,15 @@ function ConfirmedPageContent() {
 
     // Force metadata loading on mount for all videos
     useEffect(() => {
-      if (videoRef.current && videoRef.current.readyState === 0) {
-        console.log('Forcing metadata load for:', videoId);
-        videoRef.current.load();
-      }
+      const timer = setTimeout(() => {
+        if (videoRef.current) {
+          console.log('Forcing metadata load for:', videoId, 'readyState:', videoRef.current.readyState);
+          // Always call load() to ensure video starts loading
+          videoRef.current.load();
+        }
+      }, 100); // Small delay to ensure video element is ready
+
+      return () => clearTimeout(timer);
     }, [videoId]);
 
     // Preview functionality - only for main-vsl video
@@ -480,7 +486,7 @@ function ConfirmedPageContent() {
           ref={videoRef}
           src={videoSrc}
           poster="/speaker.jpg"
-          preload="metadata"
+          preload={autoPreload ? "auto" : "metadata"}
           playsInline
           className="w-full h-full object-contain"
           style={{ pointerEvents: 'none' }}
@@ -878,6 +884,7 @@ function ConfirmedPageContent() {
                   videoSrc="/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FThank%2Byou%2BVSL.mp4"
                   videoId="main-vsl"
                   className="w-full h-full"
+                  autoPreload={true}
                 />
               </div>
             </div>
