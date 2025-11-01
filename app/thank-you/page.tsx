@@ -623,61 +623,15 @@ function ConfirmedPageContent() {
                   )}
                 </button>
 
-                <button
+                <button 
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     if (videoRef.current) {
-                      const video = videoRef.current as any;
-
-                      // Check if we're on iOS Safari
-                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-                      if (isIOS) {
-                        // iOS Safari requires webkitEnterFullscreen on the video element
-                        if (video.webkitEnterFullscreen) {
-                          try {
-                            video.webkitEnterFullscreen();
-                          } catch (err) {
-                            console.log('iOS fullscreen error:', err);
-                          }
-                        } else if (video.webkitRequestFullscreen) {
-                          video.webkitRequestFullscreen();
-                        }
+                      if (document.fullscreenElement) {
+                        document.exitFullscreen();
                       } else {
-                        // Standard fullscreen API for other browsers
-                        const isCurrentlyFullscreen = !!(
-                          document.fullscreenElement ||
-                          (document as any).webkitFullscreenElement ||
-                          (document as any).msFullscreenElement ||
-                          (document as any).mozFullScreenElement
-                        );
-
-                        if (isCurrentlyFullscreen) {
-                          // Exit fullscreen with cross-browser support
-                          if (document.exitFullscreen) {
-                            document.exitFullscreen();
-                          } else if ((document as any).webkitExitFullscreen) {
-                            (document as any).webkitExitFullscreen();
-                          } else if ((document as any).msExitFullscreen) {
-                            (document as any).msExitFullscreen();
-                          } else if ((document as any).mozCancelFullScreen) {
-                            (document as any).mozCancelFullScreen();
-                          }
-                        } else {
-                          // Enter fullscreen with cross-browser support
-                          if (video.requestFullscreen) {
-                            video.requestFullscreen().catch(err => {
-                              console.log('Fullscreen error:', err);
-                            });
-                          } else if (video.webkitRequestFullscreen) {
-                            video.webkitRequestFullscreen();
-                          } else if (video.msRequestFullscreen) {
-                            video.msRequestFullscreen();
-                          } else if (video.mozRequestFullScreen) {
-                            video.mozRequestFullScreen();
-                          }
-                        }
+                        videoRef.current.requestFullscreen().catch(() => {});
                       }
                     }
                   }}
@@ -982,11 +936,8 @@ function ConfirmedPageContent() {
             {/* Step 2 Section */}
             <div className="text-center mb-6 md:mb-8">
               <h2 className="text-xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 md:mb-6">
-                Step #2 Of 2: Review Client Results
+                Step #2 Of 2: Watch reviews from our students and clients
               </h2>
-              <p className="text-xs md:text-lg text-gray-700 max-w-4xl mx-auto px-2 md:px-0">
-                Please note some clients worked with our Co-Founder Shaul while others worked with our Co-Founder Alex. You may hear different names in these videos – this is why.
-              </p>
             </div>
           </div>
         </div>
@@ -1714,8 +1665,18 @@ function ConfirmedPageContent() {
   );
 }
 
+// Force dynamic rendering - disable all caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 // Version number - increment this when you make changes
 const PAGE_VERSION = '2.0.0';
+
+export const metadata = {
+  title: 'Thank You - AstroForYou',
+  robots: 'noindex, nofollow',
+};
 
 export default function ConfirmedPage() {
   return (

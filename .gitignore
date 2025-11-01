@@ -113,3 +113,5 @@ tbr_download.log
 *.md.backup
 nginx-*.conf
 ecosystem.config.js
+
+.claude/
