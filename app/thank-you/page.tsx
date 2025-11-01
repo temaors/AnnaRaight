@@ -1667,16 +1667,8 @@ function ConfirmedPageContent() {
 
 // Force dynamic rendering - disable all caching
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'force-no-store';
-
 // Version number - increment this when you make changes
 const PAGE_VERSION = '2.0.0';
-
-export const metadata = {
-  title: 'Thank You - AstroForYou',
-  robots: 'noindex, nofollow',
-};
 
 export default function ConfirmedPage() {
   return (
