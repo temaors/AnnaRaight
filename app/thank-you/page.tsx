@@ -163,6 +163,7 @@ function ConfirmedPageContent() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const previewTimerRef = useRef<NodeJS.Timeout | null>(null);
     const isPreviewActiveRef = useRef(false);
+    const lastAllowedTimeRef = useRef(0);
     
     // Local state instead of global state
     const [localState, setLocalState] = useState({
@@ -459,6 +460,51 @@ function ConfirmedPageContent() {
         
         return () => clearTimeout(timer);
       }
+    }, [videoId]);
+
+    // Prevent seeking in fullscreen - only for main-vsl video
+    useEffect(() => {
+      // Only apply seeking prevention to main-vsl video
+      if (videoId !== "main-vsl") return;
+
+      const video = videoRef.current;
+      if (!video) return;
+
+      const handleSeeking = () => {
+        if (!videoRef.current) return;
+
+        // Check if in fullscreen
+        const isFullscreen = !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).webkitCurrentFullScreenElement ||
+          (document as any).msFullscreenElement ||
+          (document as any).mozFullScreenElement
+        );
+
+        // If in fullscreen and user tries to seek, prevent it
+        if (isFullscreen && Math.abs(videoRef.current.currentTime - lastAllowedTimeRef.current) > 0.5) {
+          console.log('Seeking prevented in fullscreen for', videoId, ', reverting to:', lastAllowedTimeRef.current);
+          videoRef.current.currentTime = lastAllowedTimeRef.current;
+        }
+      };
+
+      const handleTimeUpdate = () => {
+        if (!videoRef.current) return;
+
+        // Update last allowed time during normal playback
+        lastAllowedTimeRef.current = videoRef.current.currentTime;
+      };
+
+      video.addEventListener('seeking', handleSeeking);
+      video.addEventListener('timeupdate', handleTimeUpdate);
+
+      return () => {
+        if (video) {
+          video.removeEventListener('seeking', handleSeeking);
+          video.removeEventListener('timeupdate', handleTimeUpdate);
+        }
+      };
     }, [videoId]);
 
     // Handle fullscreen changes for Android and iOS
