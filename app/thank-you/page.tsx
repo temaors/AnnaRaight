@@ -662,7 +662,7 @@ function ConfirmedPageContent() {
                 </button>
 
                 <button
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     if (videoRef.current) {
@@ -673,14 +673,34 @@ function ConfirmedPageContent() {
 
                       if (isIOS) {
                         // iOS Safari requires webkitEnterFullscreen on the video element
-                        if (video.webkitEnterFullscreen) {
-                          try {
-                            video.webkitEnterFullscreen();
-                          } catch (err) {
-                            console.log('iOS fullscreen error:', err);
+                        // and the video must be playing
+                        try {
+                          // Ensure video is playing first
+                          if (video.paused) {
+                            video.muted = false;
+                            await video.play();
                           }
-                        } else if (video.webkitRequestFullscreen) {
-                          video.webkitRequestFullscreen();
+
+                          // Now try to enter fullscreen
+                          if (video.webkitEnterFullscreen) {
+                            video.webkitEnterFullscreen();
+                          } else if (video.webkitEnterFullScreen) {
+                            video.webkitEnterFullScreen();
+                          } else if (video.webkitRequestFullscreen) {
+                            video.webkitRequestFullscreen();
+                          }
+                        } catch (err) {
+                          console.log('iOS fullscreen error:', err);
+                          // Try with muted if unmuted failed
+                          try {
+                            video.muted = true;
+                            await video.play();
+                            if (video.webkitEnterFullscreen) {
+                              video.webkitEnterFullscreen();
+                            }
+                          } catch (err2) {
+                            console.log('iOS fullscreen retry error:', err2);
+                          }
                         }
                       } else {
                         // Standard fullscreen API for other browsers
