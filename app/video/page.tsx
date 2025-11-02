@@ -150,6 +150,79 @@ export default function WatchPage() {
       return () => clearTimeout(timer);
     }, []);
 
+    // Handle fullscreen changes for Android and iOS
+    useEffect(() => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      const handleFullscreenChange = () => {
+        if (!videoRef.current) return;
+
+        const isFullscreen = !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).webkitCurrentFullScreenElement ||
+          (document as any).msFullscreenElement ||
+          (document as any).mozFullScreenElement
+        );
+
+        console.log('Fullscreen change detected, isFullscreen:', isFullscreen);
+
+        // Enable native controls in fullscreen for better compatibility
+        if (isFullscreen) {
+          console.log('Enabling controls for fullscreen');
+          videoRef.current.setAttribute('controls', 'true');
+          // Also disable pointer-events restriction in fullscreen
+          videoRef.current.style.pointerEvents = 'auto';
+        } else {
+          console.log('Disabling controls, exiting fullscreen');
+          videoRef.current.removeAttribute('controls');
+          videoRef.current.style.pointerEvents = 'none';
+        }
+      };
+
+      const handleWebkitBeginFullscreen = () => {
+        console.log('iOS fullscreen begin');
+        if (videoRef.current) {
+          videoRef.current.setAttribute('controls', 'true');
+          videoRef.current.style.pointerEvents = 'auto';
+        }
+      };
+
+      const handleWebkitEndFullscreen = () => {
+        console.log('iOS fullscreen end');
+        if (videoRef.current) {
+          videoRef.current.removeAttribute('controls');
+          videoRef.current.style.pointerEvents = 'none';
+        }
+      };
+
+      // Standard fullscreen events
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+      // iOS fullscreen events
+      video.addEventListener('webkitbeginfullscreen', handleWebkitBeginFullscreen);
+      video.addEventListener('webkitendfullscreen', handleWebkitEndFullscreen);
+
+      // Trigger check on mount in case already in fullscreen
+      handleFullscreenChange();
+
+      return () => {
+        document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+
+        if (video) {
+          video.removeEventListener('webkitbeginfullscreen', handleWebkitBeginFullscreen);
+          video.removeEventListener('webkitendfullscreen', handleWebkitEndFullscreen);
+        }
+      };
+    }, []);
+
     // Cleanup video on unmount to prevent memory leaks
     useEffect(() => {
       return () => {
@@ -346,6 +419,14 @@ export default function WatchPage() {
                   e.stopPropagation();
                   if (videoRef.current) {
                     const video = videoRef.current as any;
+
+                    // IMPORTANT: Stop preview mode before entering fullscreen
+                    isPreviewActiveRef.current = false;
+                    if (previewTimerRef.current) {
+                      clearTimeout(previewTimerRef.current);
+                      previewTimerRef.current = null;
+                    }
+                    setLocalState(prev => ({ ...prev, isPreview: false }));
 
                     // Check if we're on iOS Safari
                     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
