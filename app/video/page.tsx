@@ -151,13 +151,16 @@ export default function WatchPage() {
       return () => clearTimeout(timer);
     }, []);
 
-    // Prevent seeking in fullscreen
+    // Prevent seeking in fullscreen - more aggressive approach
     useEffect(() => {
       const video = videoRef.current;
       if (!video) return;
 
-      const handleSeeking = () => {
+      const handleTimeUpdate = () => {
         if (!videoRef.current) return;
+
+        const currentTime = videoRef.current.currentTime;
+        const lastAllowed = lastAllowedTimeRef.current;
 
         // Check if in fullscreen
         const isFullscreen = !!(
@@ -168,27 +171,48 @@ export default function WatchPage() {
           (document as any).mozFullScreenElement
         );
 
-        // If in fullscreen and user tries to seek, prevent it
-        if (isFullscreen && Math.abs(videoRef.current.currentTime - lastAllowedTimeRef.current) > 0.5) {
-          console.log('Seeking prevented in fullscreen, reverting to:', lastAllowedTimeRef.current);
-          videoRef.current.currentTime = lastAllowedTimeRef.current;
+        // If in fullscreen and user jumped forward (seeking), prevent it
+        if (isFullscreen && currentTime > lastAllowed + 0.5) {
+          console.log('Forward seeking detected in fullscreen, reverting from', currentTime, 'to:', lastAllowed);
+          videoRef.current.currentTime = lastAllowed;
+          return;
+        }
+
+        // Update last allowed time only during normal playback or backward seeking
+        if (currentTime <= lastAllowed + 0.5) {
+          lastAllowedTimeRef.current = currentTime;
         }
       };
 
-      const handleTimeUpdate = () => {
+      const handleSeeking = () => {
         if (!videoRef.current) return;
 
-        // Update last allowed time during normal playback
-        lastAllowedTimeRef.current = videoRef.current.currentTime;
+        const currentTime = videoRef.current.currentTime;
+        const lastAllowed = lastAllowedTimeRef.current;
+
+        // Check if in fullscreen
+        const isFullscreen = !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).webkitCurrentFullScreenElement ||
+          (document as any).msFullscreenElement ||
+          (document as any).mozFullScreenElement
+        );
+
+        // Block forward seeking in fullscreen
+        if (isFullscreen && currentTime > lastAllowed + 0.3) {
+          console.log('Seeking event: preventing forward seek from', currentTime, 'to:', lastAllowed);
+          videoRef.current.currentTime = lastAllowed;
+        }
       };
 
-      video.addEventListener('seeking', handleSeeking);
       video.addEventListener('timeupdate', handleTimeUpdate);
+      video.addEventListener('seeking', handleSeeking);
 
       return () => {
         if (video) {
-          video.removeEventListener('seeking', handleSeeking);
           video.removeEventListener('timeupdate', handleTimeUpdate);
+          video.removeEventListener('seeking', handleSeeking);
         }
       };
     }, []);
