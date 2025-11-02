@@ -477,23 +477,34 @@ function ConfirmedPageContent() {
           (document as any).mozFullScreenElement
         );
 
+        console.log('Fullscreen change detected, isFullscreen:', isFullscreen);
+
         // Enable native controls in fullscreen for better compatibility
         if (isFullscreen) {
+          console.log('Enabling controls for fullscreen');
           videoRef.current.setAttribute('controls', 'true');
+          // Also disable pointer-events restriction in fullscreen
+          videoRef.current.style.pointerEvents = 'auto';
         } else {
+          console.log('Disabling controls, exiting fullscreen');
           videoRef.current.removeAttribute('controls');
+          videoRef.current.style.pointerEvents = 'none';
         }
       };
 
       const handleWebkitBeginFullscreen = () => {
+        console.log('iOS fullscreen begin');
         if (videoRef.current) {
           videoRef.current.setAttribute('controls', 'true');
+          videoRef.current.style.pointerEvents = 'auto';
         }
       };
 
       const handleWebkitEndFullscreen = () => {
+        console.log('iOS fullscreen end');
         if (videoRef.current) {
           videoRef.current.removeAttribute('controls');
+          videoRef.current.style.pointerEvents = 'none';
         }
       };
 
@@ -506,6 +517,9 @@ function ConfirmedPageContent() {
       // iOS fullscreen events
       video.addEventListener('webkitbeginfullscreen', handleWebkitBeginFullscreen);
       video.addEventListener('webkitendfullscreen', handleWebkitEndFullscreen);
+
+      // Trigger check on mount in case already in fullscreen
+      handleFullscreenChange();
 
       return () => {
         document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -564,19 +578,19 @@ function ConfirmedPageContent() {
           disablePictureInPicture={false}
           className="w-full h-full object-contain -z-10"
           style={{ pointerEvents: 'none' }}
-          onTimeUpdate={() => {
-            if (videoRef.current) {
-              const currentTime = videoRef.current.currentTime;
-              setLocalState(prev => ({ ...prev, currentTime }));
-              
-              // Note: Preview time limit is now handled by timer, not onTimeUpdate
-              // This prevents conflicts between timer and onTimeUpdate logic
-            }
-          }}
           onLoadedMetadata={() => {
             if (videoRef.current) {
               console.log('Video metadata loaded for:', videoId, 'duration:', videoRef.current.duration);
               setLocalState(prev => ({ ...prev, duration: videoRef.current!.duration }));
+            }
+          }}
+          onTimeUpdate={() => {
+            if (videoRef.current) {
+              const currentTime = videoRef.current.currentTime;
+              setLocalState(prev => ({ ...prev, currentTime }));
+
+              // Note: Preview time limit is now handled by timer, not onTimeUpdate
+              // This prevents conflicts between timer and onTimeUpdate logic
             }
           }}
           onPlay={() => {
