@@ -459,6 +459,65 @@ function ConfirmedPageContent() {
       }
     }, [videoId]);
 
+    // Handle fullscreen changes for Android and iOS
+    useEffect(() => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      const handleFullscreenChange = () => {
+        if (!videoRef.current) return;
+
+        const isFullscreen = !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).webkitCurrentFullScreenElement ||
+          (document as any).msFullscreenElement ||
+          (document as any).mozFullScreenElement
+        );
+
+        // Enable native controls in fullscreen for better compatibility
+        if (isFullscreen) {
+          videoRef.current.setAttribute('controls', 'true');
+        } else {
+          videoRef.current.removeAttribute('controls');
+        }
+      };
+
+      const handleWebkitBeginFullscreen = () => {
+        if (videoRef.current) {
+          videoRef.current.setAttribute('controls', 'true');
+        }
+      };
+
+      const handleWebkitEndFullscreen = () => {
+        if (videoRef.current) {
+          videoRef.current.removeAttribute('controls');
+        }
+      };
+
+      // Standard fullscreen events
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+      // iOS fullscreen events
+      video.addEventListener('webkitbeginfullscreen', handleWebkitBeginFullscreen);
+      video.addEventListener('webkitendfullscreen', handleWebkitEndFullscreen);
+
+      return () => {
+        document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+
+        if (video) {
+          video.removeEventListener('webkitbeginfullscreen', handleWebkitBeginFullscreen);
+          video.removeEventListener('webkitendfullscreen', handleWebkitEndFullscreen);
+        }
+      };
+    }, []);
+
     // Cleanup video on unmount to prevent memory leaks
     useEffect(() => {
       return () => {
