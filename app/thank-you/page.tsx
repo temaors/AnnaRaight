@@ -55,75 +55,82 @@ function ConfirmedPageContent() {
 
   // Video data with direct S3 URLs - memoized to prevent re-renders
   const testimonialVideos = useMemo(() => [
-    { 
-      id: 'julia', 
-      name: 'Julia', 
+    {
+      id: 'julia',
+      name: 'Julia',
       file: '/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FIMG_1054.mp4',
       title: 'Amazing Results with Astrology Course',
       subtitle: '(Life-Changing Experience)',
       duration: '1:49',
       color: 'purple',
-      startTime: 0
+      startTime: 0,
+      poster: '/video-previews/julia.svg'
     },
-    { 
-      id: 'valeria', 
-      name: 'Valeria', 
+    {
+      id: 'valeria',
+      name: 'Valeria',
       file: '/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FIMG_1041.mp4',
       title: 'How I Scaled A Coaching Business In 90 Days',
       subtitle: '(Using A Fully Automated Webinar Funnel)',
       duration: '1:30',
       color: 'purple',
-      startTime: 0
+      startTime: 0,
+      poster: '/video-previews/valeria.svg'
     },
-    { 
-      id: 'irina', 
-      name: 'Irina', 
+    {
+      id: 'irina',
+      name: 'Irina',
       file: '/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FIMG_1040.mp4',
       title: 'Complete Business Transformation In Just 90 Days',
       subtitle: '(Complete Business Transformation)',
       duration: '3:00',
       color: 'purple',
-      startTime: 0
+      startTime: 0,
+      poster: '/video-previews/irina.svg'
     },
-    { 
-      id: 'olga', 
-      name: 'Olga', 
+    {
+      id: 'olga',
+      name: 'Olga',
       file: '/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FIMG_1038.mp4',
       title: 'How I Built A 6-Figure Consulting Business In 6 Months',
       subtitle: '(Starting With Zero Experience)',
       duration: '1:40',
       color: 'purple',
-      startTime: 0
+      startTime: 0,
+      poster: '/video-previews/olga.svg'
     },
-    { 
-      id: 'zhenya', 
-      name: 'Zhenya', 
+    {
+      id: 'zhenya',
+      name: 'Zhenya',
       file: '/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FIMG_1036.mp4',
       title: 'From Freelancer To Agency Owner',
       subtitle: '(Building A Scalable Business Model)',
       duration: '2:20',
       color: 'purple',
-      startTime: 0
+      startTime: 0,
+      poster: '/video-previews/zhenya.svg'
     },
-    { 
-      id: 'olga2', 
-      name: 'Olga', 
+    {
+      id: 'olga2',
+      name: 'Olga',
       file: '/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FIMG_1037.mp4',
       title: 'The Knowledge Revolution',
       subtitle: '(Transforming Lives Through Learning)',
       duration: '1:50',
       color: 'purple',
-      startTime: 0
+      startTime: 0,
+      poster: '/video-previews/olga2.svg'
     },
-    { 
-      id: 'vladimir', 
-      name: 'Vladimir', 
+    {
+      id: 'vladimir',
+      name: 'Vladimir',
       file: '/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FIMG_1039.mp4',
       title: 'From Freelancer To Agency Owner',
       subtitle: '(Building A Scalable Business Model)',
       duration: '0:49',
       color: 'purple',
-      startTime: 0
+      startTime: 0,
+      poster: '/video-previews/vladimir.svg'
     }
   ], []);
 
@@ -145,12 +152,13 @@ function ConfirmedPageContent() {
   };
 
   // Custom Video Player Component with local state
-  const CustomVideoPlayer = ({ videoSrc, startTime = 0, videoId, className = "", autoPreload = false }: {
+  const CustomVideoPlayer = ({ videoSrc, startTime = 0, videoId, className = "", autoPreload = false, poster }: {
     videoSrc: string;
     startTime?: number;
     videoId: string;
     className?: string;
     autoPreload?: boolean;
+    poster?: string;
   }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const previewTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -485,7 +493,7 @@ function ConfirmedPageContent() {
         <video
           ref={videoRef}
           src={videoSrc}
-          poster="/speaker.jpg"
+          poster={poster || "/speaker.jpg"}
           preload={autoPreload ? "auto" : "metadata"}
           playsInline
           className="w-full h-full object-contain"
@@ -885,6 +893,7 @@ function ConfirmedPageContent() {
                   videoId="main-vsl"
                   className="w-full h-full"
                   autoPreload={true}
+                  poster="/video-previews/main-vsl.svg"
                 />
               </div>
             </div>
@@ -988,6 +997,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[0].file}
                       videoId="julia-mobile"
                       className="w-full h-full aspect-video"
+                      poster={testimonialVideos[0].poster}
                     />
                   </div>
 
@@ -1031,6 +1041,7 @@ function ConfirmedPageContent() {
                         videoSrc={testimonialVideos[0].file}
                         videoId="julia-desktop"
                         className="w-full h-full"
+                        poster={testimonialVideos[0].poster}
                       />
                     </div>
                   </div>
@@ -1074,6 +1085,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[1].file}
                       videoId="valeria-mobile"
                       className="w-full h-full aspect-video"
+                      poster={testimonialVideos[1].poster}
                     />
                   </div>
 
@@ -1117,6 +1129,7 @@ function ConfirmedPageContent() {
                         videoSrc={testimonialVideos[1].file}
                         videoId="valeria-desktop"
                         className="w-full h-full"
+                        poster={testimonialVideos[1].poster}
                       />
                     </div>
                   </div>
@@ -1160,6 +1173,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[2].file}
                       videoId="irina-mobile"
                       className="w-full h-full aspect-video"
+                      poster={testimonialVideos[2].poster}
                     />
                   </div>
 
@@ -1204,6 +1218,7 @@ function ConfirmedPageContent() {
                         videoSrc={testimonialVideos[2].file}
                         videoId="irina-desktop"
                         className="w-full h-full"
+                        poster={testimonialVideos[2].poster}
                       />
                     </div>
                   </div>
@@ -1249,6 +1264,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[3].file}
                       videoId="olga-mobile"
                       className="w-full h-full aspect-video"
+                      poster={testimonialVideos[3].poster}
                     />
                   </div>
 
@@ -1292,6 +1308,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[3].file}
                       videoId="olga-desktop"
                       className="w-full h-full"
+                      poster={testimonialVideos[3].poster}
                     />
                   </div>
                 </div>
@@ -1336,6 +1353,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[4].file}
                       videoId="zhenya-mobile"
                       className="w-full h-full aspect-video"
+                      poster={testimonialVideos[4].poster}
                     />
                   </div>
 
@@ -1379,6 +1397,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[4].file}
                       videoId="zhenya-desktop"
                       className="w-full h-full"
+                      poster={testimonialVideos[4].poster}
                     />
                   </div>
                 </div>
@@ -1425,6 +1444,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[5].file}
                       videoId="olga2-mobile"
                       className="w-full h-full aspect-video"
+                      poster={testimonialVideos[5].poster}
                     />
                   </div>
 
@@ -1468,6 +1488,7 @@ function ConfirmedPageContent() {
                         videoSrc={testimonialVideos[5].file}
                         videoId="olga2-desktop"
                         className="w-full h-full"
+                        poster={testimonialVideos[5].poster}
                       />
                     </div>
                   </div>
@@ -1512,6 +1533,7 @@ function ConfirmedPageContent() {
                       videoSrc={testimonialVideos[6].file}
                       videoId="vladimir-mobile"
                       className="w-full h-full aspect-video"
+                      poster={testimonialVideos[6].poster}
                     />
                   </div>
 
@@ -1555,6 +1577,7 @@ function ConfirmedPageContent() {
                         videoSrc={testimonialVideos[6].file}
                         videoId="vladimir-desktop"
                         className="w-full h-full"
+                        poster={testimonialVideos[6].poster}
                       />
                     </div>
                   </div>
@@ -1682,11 +1705,12 @@ function ConfirmedPageContent() {
             
             {/* Video Player */}
             <div className="rounded-lg overflow-hidden">
-              <CustomVideoPlayer 
+              <CustomVideoPlayer
                 videoSrc={selectedVideo || ''}
                 startTime={0}
                 videoId="modal-video"
                 className="w-full h-full"
+                poster=""
               />
             </div>
           </div>

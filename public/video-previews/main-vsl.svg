@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad-main-vsl" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5C1C77;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3B0764;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="720" fill="url(#grad-main-vsl)"/>
+
+  <!-- Dark overlay -->
+  <rect width="1280" height="720" fill="rgba(0, 0, 0, 0.3)"/>
+
+  <!-- Name text -->
+  <text x="640" y="360"
+        font-family="Arial, sans-serif"
+        font-size="80"
+        font-weight="bold"
+        fill="white"
+        text-anchor="middle"
+        dominant-baseline="middle">
+    Thank You
+  </text>
+
+  <!-- Play button circle -->
+  <circle cx="640" cy="480" r="60" fill="rgba(255, 255, 255, 0.9)"/>
+
+  <!-- Play triangle -->
+  <polygon points="620,460 620,500 660,480" fill="#5C1C77"/>
+</svg>
