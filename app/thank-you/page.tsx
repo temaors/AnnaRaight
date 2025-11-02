@@ -214,6 +214,7 @@ function ConfirmedPageContent() {
         const scheduleNextPreview = () => {
           previewTimerRef.current = setTimeout(() => {
             console.log('Timer triggered for', videoId, 'isPreviewActive:', isPreviewActiveRef.current);
+            // Only continue preview loop if still in preview mode (checked via ref to avoid stale closure)
             if (videoRef.current && isPreviewActiveRef.current) {
               console.log('Pausing and restarting 5-second preview loop for', videoId);
               videoRef.current.pause();
@@ -273,10 +274,11 @@ function ConfirmedPageContent() {
           }
           setLocalState(prev => ({ ...prev, isPreview: false }));
 
-          // Set start time if specified
+          // Set start time only if video is at the beginning or in preview
           const baseId = videoId.split('-')[0];
           const videoData = testimonialVideos.find(v => v.id === baseId);
-          if (videoData && videoData.startTime > 0) {
+          // Only reset to startTime if we're at the very beginning (first 1 second)
+          if (videoData && videoData.startTime > 0 && video.currentTime < 1) {
             video.currentTime = videoData.startTime;
           }
           video.muted = false;
@@ -728,6 +730,14 @@ function ConfirmedPageContent() {
                     e.stopPropagation();
                     if (videoRef.current) {
                       const video = videoRef.current as any;
+
+                      // IMPORTANT: Stop preview mode before entering fullscreen
+                      isPreviewActiveRef.current = false;
+                      if (previewTimerRef.current) {
+                        clearTimeout(previewTimerRef.current);
+                        previewTimerRef.current = null;
+                      }
+                      setLocalState(prev => ({ ...prev, isPreview: false }));
 
                       // Check if we're on iOS Safari
                       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
