@@ -64,7 +64,7 @@ function ConfirmedPageContent() {
       duration: '1:49',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/julia.svg'
+      poster: '/video-previews/julia.jpg'
     },
     {
       id: 'valeria',
@@ -75,7 +75,7 @@ function ConfirmedPageContent() {
       duration: '1:30',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/valeria.svg'
+      poster: '/video-previews/valeria.jpg'
     },
     {
       id: 'irina',
@@ -86,7 +86,7 @@ function ConfirmedPageContent() {
       duration: '3:00',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/irina.svg'
+      poster: '/video-previews/irina.jpg'
     },
     {
       id: 'olga',
@@ -97,7 +97,7 @@ function ConfirmedPageContent() {
       duration: '1:40',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/olga.svg'
+      poster: '/video-previews/olga.jpg'
     },
     {
       id: 'zhenya',
@@ -108,7 +108,7 @@ function ConfirmedPageContent() {
       duration: '2:20',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/zhenya.svg'
+      poster: '/video-previews/zhenya.jpg'
     },
     {
       id: 'olga2',
@@ -119,7 +119,7 @@ function ConfirmedPageContent() {
       duration: '1:50',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/olga2.svg'
+      poster: '/video-previews/olga2.jpg'
     },
     {
       id: 'vladimir',
@@ -130,7 +130,7 @@ function ConfirmedPageContent() {
       duration: '0:49',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/vladimir.svg'
+      poster: '/video-previews/vladimir.jpg'
     }
   ], []);
 
@@ -893,7 +893,7 @@ function ConfirmedPageContent() {
                   videoId="main-vsl"
                   className="w-full h-full"
                   autoPreload={true}
-                  poster="/video-previews/main-vsl.svg"
+                  poster="/video-previews/main-vsl.jpg"
                 />
               </div>
             </div>
@@ -976,7 +976,7 @@ function ConfirmedPageContent() {
             {/* Step 2 Section */}
             <div className="text-center mb-6 md:mb-8">
               <h2 className="text-xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 md:mb-6">
-                Step #2 Of 2: Watch reviews from our students and clients
+                Step #2 Of 2: Watch reviews from our clients
               </h2>
             </div>
           </div>
@@ -1012,7 +1012,6 @@ function ConfirmedPageContent() {
                     
                     {/* Name and Title */}
                     <h4 className="text-xl font-bold text-gray-900 mb-1">Julia</h4>
-                    <p className="text-gray-500 text-sm mb-4">Student</p>
                     
                     {/* Stars */}
                     <div className="flex justify-center mb-4">
@@ -1052,7 +1051,6 @@ function ConfirmedPageContent() {
                     <div className="flex items-center justify-center mb-2">
                       <div>
                         <h4 className="text-2xl font-bold text-gray-900">Julia</h4>
-                        <p className="text-gray-500 text-sm">Student</p>
                       </div>
                     </div>
                     
@@ -1100,7 +1098,6 @@ function ConfirmedPageContent() {
                     
                     {/* Name and Title */}
                     <h4 className="text-xl font-bold text-gray-900 mb-1">Valeria</h4>
-                    <p className="text-gray-500 text-sm mb-4">Student</p>
                     
                     {/* Stars */}
                     <div className="flex justify-center mb-4">
@@ -1140,7 +1137,6 @@ function ConfirmedPageContent() {
                     <div className="flex items-center justify-center mb-2">
                       <div>
                         <h4 className="text-2xl font-bold text-gray-900">Valeria</h4>
-                        <p className="text-gray-500 text-sm">Student</p>
                       </div>
                     </div>
                     
@@ -1189,7 +1185,6 @@ function ConfirmedPageContent() {
                     {/* Name and Title */}
                     
                     <h4 className="text-xl font-bold text-gray-900 mb-1">Irina</h4>
-                    <p className="text-gray-500 text-sm mb-4">Student</p>
                     
                     {/* Stars */}
                     <div className="flex justify-center mb-4">
@@ -1230,7 +1225,6 @@ function ConfirmedPageContent() {
                     <div className="flex items-center justify-center mb-2">
                       <div>
                         <h4 className="text-2xl font-bold text-gray-900">Irina</h4>
-                        <p className="text-gray-500 text-sm">Student</p>
                       </div>
                     </div>
                     
@@ -1279,7 +1273,6 @@ function ConfirmedPageContent() {
                     
                     {/* Name and Title */}
                     <h4 className="text-xl font-bold text-gray-900 mb-1">Olga</h4>
-                    <p className="text-gray-500 text-sm mb-4">Student</p>
                     
                     {/* Stars */}
                     <div className="flex justify-center mb-4">
@@ -1368,7 +1361,6 @@ function ConfirmedPageContent() {
                     
                     {/* Name and Title */}
                     <h4 className="text-xl font-bold text-gray-900 mb-1">Zhenya</h4>
-                    <p className="text-gray-500 text-sm mb-4">Student</p>
                     
                     {/* Stars */}
                     <div className="flex justify-center mb-4">
@@ -1459,7 +1451,6 @@ function ConfirmedPageContent() {
                     
                     {/* Name and Title */}
                     <h4 className="text-xl font-bold text-gray-900 mb-1">Olga</h4>
-                    <p className="text-gray-500 text-sm mb-4">Student</p>
                     
                     {/* Stars */}
                     <div className="flex justify-center mb-4">
@@ -1548,7 +1539,6 @@ function ConfirmedPageContent() {
                     
                     {/* Name and Title */}
                     <h4 className="text-xl font-bold text-gray-900 mb-1">Vladimir</h4>
-                    <p className="text-gray-500 text-sm mb-4">Student</p>
                     
                     {/* Stars */}
                     <div className="flex justify-center mb-4">

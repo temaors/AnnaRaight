@@ -29,6 +29,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
+    "ffmpeg-static": "^5.2.0",
     "google-auth-library": "^10.1.0",
     "googleapis": "^154.0.0",
     "jsonwebtoken": "^9.0.2",
