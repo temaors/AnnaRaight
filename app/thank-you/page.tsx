@@ -496,7 +496,12 @@ function ConfirmedPageContent() {
           poster={poster || "/speaker.jpg"}
           preload={autoPreload ? "auto" : "metadata"}
           playsInline
-          className="w-full h-full object-contain"
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x-webkit-airplay="allow"
+          controlsList="nodownload"
+          disablePictureInPicture={false}
+          className="w-full h-full object-contain -z-10"
           style={{ pointerEvents: 'none' }}
           onTimeUpdate={() => {
             if (videoRef.current) {
@@ -548,7 +553,7 @@ function ConfirmedPageContent() {
 
         {/* Loading Spinner */}
         {localState.isLoading && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 60000 }}>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent"></div>
           </div>
         )}
@@ -561,12 +566,9 @@ function ConfirmedPageContent() {
               e.stopPropagation();
               handleLocalPlayPause();
             }}
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-16 rounded flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
-            style={{ 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-16 rounded flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer z-20"
+            style={{
               backgroundColor: 'rgba(92, 28, 119, 0.9)',
-              zIndex: 50000,
-              pointerEvents: 'auto',
-              position: 'absolute',
               animation: 'pulse 3s ease-in-out infinite'
             }}
             onMouseEnter={(e) => {
@@ -582,9 +584,9 @@ function ConfirmedPageContent() {
 
         {/* Controls Container - Visible for all videos */}
         {true && (
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-[40px] transition-all duration-300 opacity-100"
-            style={{ backgroundColor: 'rgba(92, 28, 119, 0.7)', zIndex: 9000 }}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[40px] transition-all duration-300 opacity-100 z-40"
+            style={{ backgroundColor: 'rgba(92, 28, 119, 0.7)' }}
           >
             <div className="flex items-center justify-between px-4 h-full relative">
               {/* Progress Bar */}
