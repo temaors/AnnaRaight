@@ -142,14 +142,15 @@ export default function WatchPage() {
       }
     };
 
-    // Auto-start preview when component loads
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        startPreview();
-      }, 500); // Small delay to ensure video is loaded
-      
-      return () => clearTimeout(timer);
-    }, []);
+    // Auto-start preview disabled - it was preventing video from loading properly
+    // Preview loop was interrupting video buffering by calling pause/play every 5 seconds
+    // useEffect(() => {
+    //   const timer = setTimeout(() => {
+    //     startPreview();
+    //   }, 500);
+    //
+    //   return () => clearTimeout(timer);
+    // }, []);
 
     // Prevent seeking in fullscreen - more aggressive approach
     useEffect(() => {
