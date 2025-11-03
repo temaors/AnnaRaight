@@ -5,6 +5,22 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 import { parseISO } from 'date-fns';
+import {
+  formatTime,
+  toggleFullscreen,
+  isFullscreen,
+  calculateSeekTime
+} from '@/lib/videoUtils';
+import {
+  PlayIcon,
+  PauseIcon,
+  VolumeIcon,
+  FullscreenIcon,
+  LoadingSpinner
+} from '@/components/ui/VideoIcons';
+import { useVideoFullscreen } from '@/hooks/useVideoFullscreen';
+import { useVideoSeeking } from '@/hooks/useVideoSeeking';
+import { TestimonialCard } from '@/components/TestimonialCard';
 
 function ConfirmedPageContent() {
   const searchParams = useSearchParams();
@@ -64,7 +80,9 @@ function ConfirmedPageContent() {
       duration: '1:49',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/julia.jpg'
+      poster: '/video-previews/julia.jpg',
+      quote: '"Thank you, my teacher, for teaching me not just analytics, but also self-confidence and a desire to help people."',
+      avatarLetter: 'S'
     },
     {
       id: 'valeria',
@@ -75,7 +93,9 @@ function ConfirmedPageContent() {
       duration: '1:30',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/valeria.jpg'
+      poster: '/video-previews/valeria.jpg',
+      quote: '"I recommend this course"',
+      avatarLetter: 'Z'
     },
     {
       id: 'irina',
@@ -86,7 +106,9 @@ function ConfirmedPageContent() {
       duration: '3:00',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/irina.jpg'
+      poster: '/video-previews/irina.jpg',
+      quote: '"She is a teacher with a big heart."',
+      avatarLetter: 'O'
     },
     {
       id: 'olga',
@@ -97,7 +119,9 @@ function ConfirmedPageContent() {
       duration: '1:40',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/olga.jpg'
+      poster: '/video-previews/olga.jpg',
+      quote: '"The way she delivers the material is amazing!"',
+      avatarLetter: 'M'
     },
     {
       id: 'zhenya',
@@ -108,7 +132,9 @@ function ConfirmedPageContent() {
       duration: '2:20',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/zhenya.jpg'
+      poster: '/video-previews/zhenya.jpg',
+      quote: '"I wholeheartedly recommend her school."',
+      avatarLetter: 'V'
     },
     {
       id: 'olga2',
@@ -119,7 +145,9 @@ function ConfirmedPageContent() {
       duration: '1:50',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/olga2.jpg'
+      poster: '/video-previews/olga2.jpg',
+      quote: '"Now I know exactly who I am and what I want. I don\'t need any rituals for that — astrology has already revealed everything… and more."',
+      avatarLetter: 'A'
     },
     {
       id: 'vladimir',
@@ -130,7 +158,9 @@ function ConfirmedPageContent() {
       duration: '0:49',
       color: 'purple',
       startTime: 0,
-      poster: '/video-previews/vladimir.jpg'
+      poster: '/video-previews/vladimir.jpg',
+      quote: '"I believe that astrology deserves much more attention in a person\'s life..."',
+      avatarLetter: 'D'
     }
   ], []);
 
@@ -145,12 +175,6 @@ function ConfirmedPageContent() {
   };
 
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   // Custom Video Player Component with local state
   const CustomVideoPlayer = ({ videoSrc, startTime = 0, videoId, className = "", autoPreload = false, poster }: {
     videoSrc: string;
@@ -164,7 +188,11 @@ function ConfirmedPageContent() {
     const previewTimerRef = useRef<NodeJS.Timeout | null>(null);
     const isPreviewActiveRef = useRef(false);
     const lastAllowedTimeRef = useRef(0);
-    
+
+    // Use custom hooks for video behavior
+    useVideoFullscreen(videoRef);
+    useVideoSeeking(videoRef, videoId, lastAllowedTimeRef);
+
     // Local state instead of global state
     const [localState, setLocalState] = useState({
       isPlaying: false,
@@ -313,19 +341,14 @@ function ConfirmedPageContent() {
         videoDuration: videoRef.current?.duration,
         hasCurrentTarget: !!e.currentTarget
       });
-      
+
       // Use video duration as fallback if local state duration is 0
       const currentDuration = localState.duration || (videoRef.current?.duration || 0);
-      
+
       if (!isSeekingEnabled || !videoRef.current || currentDuration === 0 || !e.currentTarget) return;
-      
-      const rect = e.currentTarget.getBoundingClientRect();
-      if (!rect) return;
-      
-      const clickX = e.clientX - rect.left;
-      const clickPercentage = Math.max(0, Math.min(1, clickX / rect.width));
-      const newTime = clickPercentage * currentDuration;
-      
+
+      const newTime = calculateSeekTime(e.clientX, e.currentTarget, currentDuration);
+
       console.log('Seeking to:', newTime, 'seconds for video:', videoId, 'using duration:', currentDuration);
       videoRef.current.currentTime = newTime;
       setLocalState(prev => ({ ...prev, currentTime: newTime }));
@@ -341,14 +364,9 @@ function ConfirmedPageContent() {
       const handleMouseMove = (moveEvent: MouseEvent) => {
         const currentDuration = localState.duration || (videoRef.current?.duration || 0);
         if (!videoRef.current || currentDuration === 0 || !progressBarElement) return;
-        
-        const rect = progressBarElement.getBoundingClientRect();
-        if (!rect) return;
-        
-        const moveX = moveEvent.clientX - rect.left;
-        const movePercentage = Math.max(0, Math.min(1, moveX / rect.width));
-        const newTime = movePercentage * currentDuration;
-        
+
+        const newTime = calculateSeekTime(moveEvent.clientX, progressBarElement, currentDuration);
+
         videoRef.current.currentTime = newTime;
         setLocalState(prev => ({ ...prev, currentTime: newTime }));
       };
@@ -365,17 +383,12 @@ function ConfirmedPageContent() {
         moveEvent.preventDefault(); // Prevent scrolling during drag
         const currentDuration = localState.duration || (videoRef.current?.duration || 0);
         if (!videoRef.current || currentDuration === 0 || !progressBarElement) return;
-        
-        const rect = progressBarElement.getBoundingClientRect();
-        if (!rect) return;
-        
+
         const touch = moveEvent.touches[0];
         if (!touch) return;
-        
-        const moveX = touch.clientX - rect.left;
-        const movePercentage = Math.max(0, Math.min(1, moveX / rect.width));
-        const newTime = movePercentage * currentDuration;
-        
+
+        const newTime = calculateSeekTime(touch.clientX, progressBarElement, currentDuration);
+
         videoRef.current.currentTime = newTime;
         setLocalState(prev => ({ ...prev, currentTime: newTime }));
       };
@@ -397,22 +410,17 @@ function ConfirmedPageContent() {
     // Touch start handler for mobile
     const handleProgressBarTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
       if (!isSeekingEnabled || !videoRef.current || !e.currentTarget) return;
-      
+
       e.preventDefault(); // Prevent mouse events from firing
-      
+
       // Handle touch as click first
       const currentDuration = localState.duration || (videoRef.current?.duration || 0);
       if (currentDuration === 0) return;
 
-      const rect = e.currentTarget.getBoundingClientRect();
-      if (!rect) return;
-
       const touch = e.touches[0];
       if (!touch) return;
 
-      const touchX = touch.clientX - rect.left;
-      const touchPercentage = Math.max(0, Math.min(1, touchX / rect.width));
-      const newTime = touchPercentage * currentDuration;
+      const newTime = calculateSeekTime(touch.clientX, e.currentTarget, currentDuration);
 
       console.log('Touch seeking to:', newTime, 'seconds for video:', videoId);
       videoRef.current.currentTime = newTime;
@@ -425,17 +433,12 @@ function ConfirmedPageContent() {
         moveEvent.preventDefault(); // Prevent scrolling during drag
         const currentDuration = localState.duration || (videoRef.current?.duration || 0);
         if (!videoRef.current || currentDuration === 0 || !progressBarElement) return;
-        
-        const rect = progressBarElement.getBoundingClientRect();
-        if (!rect) return;
-        
+
         const touch = moveEvent.touches[0];
         if (!touch) return;
-        
-        const moveX = touch.clientX - rect.left;
-        const movePercentage = Math.max(0, Math.min(1, moveX / rect.width));
-        const newTime = movePercentage * currentDuration;
-        
+
+        const newTime = calculateSeekTime(touch.clientX, progressBarElement, currentDuration);
+
         videoRef.current.currentTime = newTime;
         setLocalState(prev => ({ ...prev, currentTime: newTime }));
       };
@@ -461,148 +464,6 @@ function ConfirmedPageContent() {
         return () => clearTimeout(timer);
       }
     }, [videoId]);
-
-    // Prevent seeking in fullscreen - only for main-vsl video - more aggressive approach
-    useEffect(() => {
-      // Only apply seeking prevention to main-vsl video
-      if (videoId !== "main-vsl") return;
-
-      const video = videoRef.current;
-      if (!video) return;
-
-      const handleTimeUpdate = () => {
-        if (!videoRef.current) return;
-
-        const currentTime = videoRef.current.currentTime;
-        const lastAllowed = lastAllowedTimeRef.current;
-
-        // Check if in fullscreen
-        const isFullscreen = !!(
-          document.fullscreenElement ||
-          (document as any).webkitFullscreenElement ||
-          (document as any).webkitCurrentFullScreenElement ||
-          (document as any).msFullscreenElement ||
-          (document as any).mozFullScreenElement
-        );
-
-        // If in fullscreen and user jumped forward (seeking), prevent it
-        if (isFullscreen && currentTime > lastAllowed + 0.5) {
-          console.log('Forward seeking detected in fullscreen for', videoId, ', reverting from', currentTime, 'to:', lastAllowed);
-          videoRef.current.currentTime = lastAllowed;
-          return;
-        }
-
-        // Update last allowed time only during normal playback or backward seeking
-        if (currentTime <= lastAllowed + 0.5) {
-          lastAllowedTimeRef.current = currentTime;
-        }
-      };
-
-      const handleSeeking = () => {
-        if (!videoRef.current) return;
-
-        const currentTime = videoRef.current.currentTime;
-        const lastAllowed = lastAllowedTimeRef.current;
-
-        // Check if in fullscreen
-        const isFullscreen = !!(
-          document.fullscreenElement ||
-          (document as any).webkitFullscreenElement ||
-          (document as any).webkitCurrentFullScreenElement ||
-          (document as any).msFullscreenElement ||
-          (document as any).mozFullScreenElement
-        );
-
-        // Block forward seeking in fullscreen
-        if (isFullscreen && currentTime > lastAllowed + 0.3) {
-          console.log('Seeking event for', videoId, ': preventing forward seek from', currentTime, 'to:', lastAllowed);
-          videoRef.current.currentTime = lastAllowed;
-        }
-      };
-
-      video.addEventListener('timeupdate', handleTimeUpdate);
-      video.addEventListener('seeking', handleSeeking);
-
-      return () => {
-        if (video) {
-          video.removeEventListener('timeupdate', handleTimeUpdate);
-          video.removeEventListener('seeking', handleSeeking);
-        }
-      };
-    }, [videoId]);
-
-    // Handle fullscreen changes for Android and iOS
-    useEffect(() => {
-      const video = videoRef.current;
-      if (!video) return;
-
-      const handleFullscreenChange = () => {
-        if (!videoRef.current) return;
-
-        const isFullscreen = !!(
-          document.fullscreenElement ||
-          (document as any).webkitFullscreenElement ||
-          (document as any).webkitCurrentFullScreenElement ||
-          (document as any).msFullscreenElement ||
-          (document as any).mozFullScreenElement
-        );
-
-        console.log('Fullscreen change detected, isFullscreen:', isFullscreen);
-
-        // Enable native controls in fullscreen for better compatibility
-        if (isFullscreen) {
-          console.log('Enabling controls for fullscreen');
-          videoRef.current.setAttribute('controls', 'true');
-          // Also disable pointer-events restriction in fullscreen
-          videoRef.current.style.pointerEvents = 'auto';
-        } else {
-          console.log('Disabling controls, exiting fullscreen');
-          videoRef.current.removeAttribute('controls');
-          videoRef.current.style.pointerEvents = 'none';
-        }
-      };
-
-      const handleWebkitBeginFullscreen = () => {
-        console.log('iOS fullscreen begin');
-        if (videoRef.current) {
-          videoRef.current.setAttribute('controls', 'true');
-          videoRef.current.style.pointerEvents = 'auto';
-        }
-      };
-
-      const handleWebkitEndFullscreen = () => {
-        console.log('iOS fullscreen end');
-        if (videoRef.current) {
-          videoRef.current.removeAttribute('controls');
-          videoRef.current.style.pointerEvents = 'none';
-        }
-      };
-
-      // Standard fullscreen events
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
-      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
-      // iOS fullscreen events
-      video.addEventListener('webkitbeginfullscreen', handleWebkitBeginFullscreen);
-      video.addEventListener('webkitendfullscreen', handleWebkitEndFullscreen);
-
-      // Trigger check on mount in case already in fullscreen
-      handleFullscreenChange();
-
-      return () => {
-        document.removeEventListener('fullscreenchange', handleFullscreenChange);
-        document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-        document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-        document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
-
-        if (video) {
-          video.removeEventListener('webkitbeginfullscreen', handleWebkitBeginFullscreen);
-          video.removeEventListener('webkitendfullscreen', handleWebkitEndFullscreen);
-        }
-      };
-    }, []);
 
     // Cleanup video on unmount to prevent memory leaks
     useEffect(() => {
@@ -699,7 +560,7 @@ function ConfirmedPageContent() {
         {/* Loading Spinner */}
         {localState.isLoading && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent"></div>
+            <LoadingSpinner />
           </div>
         )}
 
@@ -721,9 +582,7 @@ function ConfirmedPageContent() {
             }}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(92, 28, 119, 0.9)'}
           >
-            <svg className="w-8 h-8 text-white ml-1" fill="white" viewBox="0 0 24 24" style={{ pointerEvents: 'none' }}>
-              <path d="M8 5v14l11-7z"/>
-            </svg>
+            <PlayIcon className="w-8 h-8 text-white ml-1" />
           </div>
         )}
 
@@ -773,20 +632,16 @@ function ConfirmedPageContent() {
                   className="text-white hover:text-white/80 transition-colors"
                 >
                   {localState.isPlaying ? (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                    </svg>
+                    <PauseIcon />
                   ) : (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
+                    <PlayIcon />
                   )}
                 </button>
               </div>
 
               {/* Right Controls */}
               <div className="flex items-center gap-2 relative z-20">
-                <button 
+                <button
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -797,15 +652,7 @@ function ConfirmedPageContent() {
                   }}
                   className="text-white hover:text-white/80 transition-colors"
                 >
-                  {localState.isMuted ? (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M9 12H4l4.5-4.5v9L9 12z" />
-                    </svg>
-                  )}
+                  <VolumeIcon isMuted={localState.isMuted} />
                 </button>
 
                 <button
@@ -813,8 +660,6 @@ function ConfirmedPageContent() {
                     e.preventDefault();
                     e.stopPropagation();
                     if (videoRef.current) {
-                      const video = videoRef.current as any;
-
                       // IMPORTANT: Stop preview mode before entering fullscreen
                       isPreviewActiveRef.current = false;
                       if (previewTimerRef.current) {
@@ -823,82 +668,13 @@ function ConfirmedPageContent() {
                       }
                       setLocalState(prev => ({ ...prev, isPreview: false }));
 
-                      // Check if we're on iOS Safari
-                      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-                      if (isIOS) {
-                        // iOS Safari requires webkitEnterFullscreen on the video element
-                        // and the video must be playing
-                        try {
-                          // Ensure video is playing first
-                          if (video.paused) {
-                            video.muted = false;
-                            await video.play();
-                          }
-
-                          // Now try to enter fullscreen
-                          if (video.webkitEnterFullscreen) {
-                            video.webkitEnterFullscreen();
-                          } else if (video.webkitEnterFullScreen) {
-                            video.webkitEnterFullScreen();
-                          } else if (video.webkitRequestFullscreen) {
-                            video.webkitRequestFullscreen();
-                          }
-                        } catch (err) {
-                          console.log('iOS fullscreen error:', err);
-                          // Try with muted if unmuted failed
-                          try {
-                            video.muted = true;
-                            await video.play();
-                            if (video.webkitEnterFullscreen) {
-                              video.webkitEnterFullscreen();
-                            }
-                          } catch (err2) {
-                            console.log('iOS fullscreen retry error:', err2);
-                          }
-                        }
-                      } else {
-                        // Standard fullscreen API for other browsers
-                        const isCurrentlyFullscreen = !!(
-                          document.fullscreenElement ||
-                          (document as any).webkitFullscreenElement ||
-                          (document as any).msFullscreenElement ||
-                          (document as any).mozFullScreenElement
-                        );
-
-                        if (isCurrentlyFullscreen) {
-                          // Exit fullscreen with cross-browser support
-                          if (document.exitFullscreen) {
-                            document.exitFullscreen();
-                          } else if ((document as any).webkitExitFullscreen) {
-                            (document as any).webkitExitFullscreen();
-                          } else if ((document as any).msExitFullscreen) {
-                            (document as any).msExitFullscreen();
-                          } else if ((document as any).mozCancelFullScreen) {
-                            (document as any).mozCancelFullScreen();
-                          }
-                        } else {
-                          // Enter fullscreen with cross-browser support
-                          if (video.requestFullscreen) {
-                            video.requestFullscreen().catch(err => {
-                              console.log('Fullscreen error:', err);
-                            });
-                          } else if (video.webkitRequestFullscreen) {
-                            video.webkitRequestFullscreen();
-                          } else if (video.msRequestFullscreen) {
-                            video.msRequestFullscreen();
-                          } else if (video.mozRequestFullScreen) {
-                            video.mozRequestFullScreen();
-                          }
-                        }
-                      }
+                      // Use the toggleFullscreen utility
+                      await toggleFullscreen(videoRef.current);
                     }
                   }}
                   className="text-white hover:text-white/80 transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                  </svg>
+                  <FullscreenIcon />
                 </button>
               </div>
             </div>
@@ -1206,621 +982,19 @@ function ConfirmedPageContent() {
         <div className="mb-16">
           {/* Video Testimonials */}
           <div className="grid grid-cols-1 gap-12 mb-12">
-            {/* First Video - New Testimonial */}
-            <div className="bg-white lg:bg-gray-50 rounded-2xl p-6 lg:p-12 relative shadow-xl">
-              {/* Mobile Design */}
-              <div className="block lg:hidden">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg" style={{width: '100%', maxWidth: '400px', margin: '0 auto'}}>
-                  {/* Video Section */}
-                  <div className="relative">
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[0].file}
-                      videoId="julia-mobile"
-                      className="w-full h-full aspect-video"
-                      poster={testimonialVideos[0].poster}
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 text-center">
-                    {/* Profile Image */}
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg">
-                        S
-                      </div>
-                    </div>
-                    
-                    {/* Name and Title */}
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">Julia</h4>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Quote */}
-                    <p className="text-gray-700 text-lg leading-relaxed" style={{marginTop: '10px'}}>
-                    "Thank you, my teacher, for teaching me not just analytics, but also self-confidence and a desire to help people."
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Design */}
-              <div className="hidden lg:block lg:flex">
-                <div className="grid grid-cols-2 gap-12 items-center">
-                  {/* Video Player Left */}
-                  <div className="relative w-full">
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{width: '400px', height: '270px'}}>
-                      <CustomVideoPlayer
-                        videoSrc={testimonialVideos[0].file}
-                        videoId="julia-desktop"
-                        className="w-full h-full"
-                        poster={testimonialVideos[0].poster}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Results Right */}
-                  <div className="text-center">
-                    {/* Profile */}
-                    <div className="flex items-center justify-center mb-2">
-                      <div>
-                        <h4 className="text-2xl font-bold text-gray-900">Julia</h4>
-                      </div>
-                    </div>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center" style={{marginTop: '40px', marginBottom: '20px'}}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-lg text-gray-700" style={{marginTop: '10px'}}>
-                    "Thank you, my teacher, for teaching me not just analytics, but also self-confidence and a desire to help people."
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Second Video - Valeria */}
-            <div className="bg-white lg:bg-gray-50 rounded-2xl p-6 lg:p-12 relative shadow-xl">
-              {/* Mobile Design */}
-              <div className="block lg:hidden">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg" style={{width: '100%', maxWidth: '400px', margin: '0 auto'}}>
-                  {/* Video Section */}
-                  <div className="relative">
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[1].file}
-                      videoId="valeria-mobile"
-                      className="w-full h-full aspect-video"
-                      poster={testimonialVideos[1].poster}
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 text-center">
-                    {/* Profile Image */}
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg">
-                        Z
-                      </div>
-                    </div>
-                    
-                    {/* Name and Title */}
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">Valeria</h4>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Quote */}
-                    <p className="text-gray-700 text-lg leading-relaxed" style={{marginTop: '10px'}}>
-                      "I recommend this course"
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Design */}
-              <div className="hidden lg:block lg:flex">
-                <div className="grid grid-cols-2 gap-12 items-center">
-                  {/* Video Player Left */}
-                  <div className="relative w-full">
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{width: '400px', height: '270px'}}>
-                      <CustomVideoPlayer
-                        videoSrc={testimonialVideos[1].file}
-                        videoId="valeria-desktop"
-                        className="w-full h-full"
-                        poster={testimonialVideos[1].poster}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Results Right */}
-                  <div className="text-center">
-                    {/* Profile */}
-                    <div className="flex items-center justify-center mb-2">
-                      <div>
-                        <h4 className="text-2xl font-bold text-gray-900">Valeria</h4>
-                      </div>
-                    </div>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center" style={{marginTop: '40px', marginBottom: '20px'}}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-lg text-gray-700" style={{marginTop: '10px'}}>
-                    "I recommend this course"
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Second Video - Irina */}
-            <div className="bg-white lg:bg-gray-50 rounded-2xl p-6 lg:p-12 relative shadow-xl">
-              {/* Mobile Design */}
-              <div className="block lg:hidden">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg" style={{width: '100%', maxWidth: '400px', margin: '0 auto'}}>
-                  {/* Video Section */}
-                  <div className="relative">
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[2].file}
-                      videoId="irina-mobile"
-                      className="w-full h-full aspect-video"
-                      poster={testimonialVideos[2].poster}
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 text-center">
-                    {/* Profile Image */}
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg">
-                        O
-                      </div>
-                    </div>
-                    
-                    {/* Name and Title */}
-                    
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">Irina</h4>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Quote */}
-                    <p className="text-gray-700 text-lg leading-relaxed" style={{marginTop: '10px'}}>
-                      "She is a teacher with a big heart."
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Design */}
-              <div className="hidden lg:block lg:flex">
-                <div className="grid grid-cols-2 gap-12 items-center">
-                  {/* Video Player Left */}
-                  <div className="relative w-full">
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{width: '400px', height: '270px'}}>
-                      <CustomVideoPlayer
-                        videoSrc={testimonialVideos[2].file}
-                        videoId="irina-desktop"
-                        className="w-full h-full"
-                        poster={testimonialVideos[2].poster}
-                      />
-                    </div>
-                  </div>
-
-
-                  {/* Results Right */}
-                  <div className="text-center">
-                    {/* Profile */}
-                    <div className="flex items-center justify-center mb-2">
-                      <div>
-                        <h4 className="text-2xl font-bold text-gray-900">Irina</h4>
-                      </div>
-                    </div>
-                    
-
-                    {/* Stars */}
-                    <div className="flex justify-center" style={{marginTop: '40px', marginBottom: '20px'}}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-lg text-gray-700" style={{marginTop: '10px'}}>
-                    "She is a teacher with a big heart."
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Third Video - Olga */}
-            <div className="bg-white lg:bg-gray-50 rounded-2xl p-6 lg:p-12 relative shadow-xl">
-              {/* Mobile Design */}
-              <div className="block lg:hidden">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg" style={{width: '100%', maxWidth: '400px', margin: '0 auto'}}>
-                  {/* Video Section */}
-                  <div className="relative">
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[3].file}
-                      videoId="olga-mobile"
-                      className="w-full h-full aspect-video"
-                      poster={testimonialVideos[3].poster}
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 text-center">
-                    {/* Profile Image */}
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg">
-                        M
-                      </div>
-                    </div>
-                    
-                    {/* Name and Title */}
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">Olga</h4>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Quote */}
-                    <p className="text-gray-700 text-lg leading-relaxed" style={{marginTop: '10px'}}>
-                      "The way she delivers the material is amazing!"
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Design */}
-              <div className="hidden lg:block lg:flex">
-                <div className="grid grid-cols-2 gap-12 items-center">
-                {/* Video Player Left */}
-                <div className="relative">
-                  <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{width: '400px', height: '270px'}}>
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[3].file}
-                      videoId="olga-desktop"
-                      className="w-full h-full"
-                      poster={testimonialVideos[3].poster}
-                    />
-                  </div>
-                </div>
-
-
-                {/* Results Right */}
-                <div className="text-center">
-                  {/* Profile */}
-                  <div className="flex items-center justify-center mb-2">
-                    <div>
-                      <h4 className="text-2xl font-bold text-gray-900">Olga</h4>
-                    </div>
-                  </div>
-                  
-
-                  {/* Stars */}
-                  <div className="flex justify-center mb-3" style={{marginTop: '60px'}}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <svg key={star} className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                      </svg>
-                    ))}
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-lg text-gray-700" style={{marginTop: '10px'}}>
-                  "The way she delivers the material is amazing!"
-                  </p>
-                </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Fourth Video - Zhenya */}
-            <div className="bg-white lg:bg-gray-50 rounded-2xl p-6 lg:p-12 relative shadow-xl">
-              {/* Mobile Design */}
-              <div className="block lg:hidden">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg" style={{width: '100%', maxWidth: '400px', margin: '0 auto'}}>
-                  {/* Video Section */}
-                  <div className="relative">
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[4].file}
-                      videoId="zhenya-mobile"
-                      className="w-full h-full aspect-video"
-                      poster={testimonialVideos[4].poster}
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 text-center">
-                    {/* Profile Image */}
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg">
-                        V
-                      </div>
-                    </div>
-                    
-                    {/* Name and Title */}
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">Zhenya</h4>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Quote */}
-                    <p className="text-gray-700 text-lg leading-relaxed" style={{marginTop: '10px'}}>
-                      "I wholeheartedly recommend her school."
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Design */}
-              <div className="hidden lg:block lg:flex">
-                <div className="grid grid-cols-2 gap-12 items-center">
-                {/* Video Player Left */}
-                <div className="relative">
-                  <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{width: '400px', height: '270px'}}>
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[4].file}
-                      videoId="zhenya-desktop"
-                      className="w-full h-full"
-                      poster={testimonialVideos[4].poster}
-                    />
-                  </div>
-                </div>
-
-
-                {/* Results Right */}
-                <div className="text-center">
-                  {/* Profile */}
-                  <div className="flex items-center justify-center mb-2">
-                    <div>
-                      <h4 className="text-2xl font-bold text-gray-900">Zhenya</h4>
-                    </div>
-                  </div>
-                  
-
-                  {/* Stars */}
-                  <div className="flex justify-center mb-3" style={{marginTop: '60px'}}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <svg key={star} className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                      </svg>
-                    ))}
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-lg text-gray-700" style={{marginTop: '10px'}}>
-                    "I wholeheartedly recommend her school."
-                  </p>
-                </div>
-              </div>
-            </div>
-
+            {testimonialVideos.map((video) => (
+              <TestimonialCard
+                key={video.id}
+                name={video.name}
+                quote={video.quote}
+                videoId={video.id}
+                videoSrc={video.file}
+                poster={video.poster}
+                avatarLetter={video.avatarLetter}
+                CustomVideoPlayer={CustomVideoPlayer}
+              />
+            ))}
           </div>
-
-          {/* Fifth Video - Olga (Second) */}
-          <div className="mb-12">
-            <div className="bg-white lg:bg-gray-50 rounded-2xl p-6 lg:p-12 relative shadow-xl">
-              {/* Mobile Design */}
-              <div className="block lg:hidden">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg" style={{width: '100%', maxWidth: '400px', margin: '0 auto'}}>
-                  {/* Video Section */}
-                  <div className="relative">
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[5].file}
-                      videoId="olga2-mobile"
-                      className="w-full h-full aspect-video"
-                      poster={testimonialVideos[5].poster}
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 text-center">
-                    {/* Profile Image */}
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg">
-                        A
-                      </div>
-                    </div>
-                    
-                    {/* Name and Title */}
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">Olga</h4>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Quote */}
-                    <p className="text-gray-700 text-lg leading-relaxed" style={{marginTop: '10px'}}>
-                      "Now I know exactly who I am and what I want. I don’t need any rituals for that — astrology has already revealed everything… and more."
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Design */}
-              <div className="hidden lg:block lg:flex">
-                <div className="grid grid-cols-2 gap-12 items-center">
-                  {/* Video Player Left */}
-                  <div className="relative w-full">
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{width: '400px', height: '270px'}}>
-                      <CustomVideoPlayer
-                        videoSrc={testimonialVideos[5].file}
-                        videoId="olga2-desktop"
-                        className="w-full h-full"
-                        poster={testimonialVideos[5].poster}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Results Right */}
-                  <div className="text-center">
-                    {/* Profile */}
-                    <div className="flex items-center justify-center mb-2">
-                      <div>
-                        <h4 className="text-2xl font-bold text-gray-900">Olga</h4>
-                      </div>
-                    </div>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center" style={{marginTop: '40px', marginBottom: '20px'}}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-lg text-gray-700" style={{marginTop: '10px'}}>
-                      "Now I know exactly who I am and what I want. I don’t need any rituals for that — astrology has already revealed everything… and more."
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sixth Video - Vladimir */}
-          <div className="mb-12">
-            <div className="bg-white lg:bg-gray-50 rounded-2xl p-6 lg:p-12 relative shadow-xl">
-              {/* Mobile Design */}
-              <div className="block lg:hidden">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg" style={{width: '100%', maxWidth: '400px', margin: '0 auto'}}>
-                  {/* Video Section */}
-                  <div className="relative">
-                    <CustomVideoPlayer
-                      videoSrc={testimonialVideos[6].file}
-                      videoId="vladimir-mobile"
-                      className="w-full h-full aspect-video"
-                      poster={testimonialVideos[6].poster}
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 text-center">
-                    {/* Profile Image */}
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-lg">
-                        D
-                      </div>
-                    </div>
-                    
-                    {/* Name and Title */}
-                    <h4 className="text-xl font-bold text-gray-900 mb-1">Vladimir</h4>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Quote */}
-                    <p className="text-gray-700 text-lg leading-relaxed" style={{marginTop: '10px'}}>
-                      "I believe that astrology deserves much more attention in a person's life..."
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Design */}
-              <div className="hidden lg:block lg:flex">
-                <div className="grid grid-cols-2 gap-12 items-center">
-                  {/* Video Player Left */}
-                  <div className="relative w-full">
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{width: '400px', height: '270px'}}>
-                      <CustomVideoPlayer
-                        videoSrc={testimonialVideos[6].file}
-                        videoId="vladimir-desktop"
-                        className="w-full h-full"
-                        poster={testimonialVideos[6].poster}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Results Right */}
-                  <div className="text-center">
-                    {/* Profile */}
-                    <div className="flex items-center justify-center mb-2">
-                      <div>
-                        <h4 className="text-2xl font-bold text-gray-900">Vladimir</h4>
-                      </div>
-                    </div>
-                    
-                    {/* Stars */}
-                    <div className="flex justify-center" style={{marginTop: '40px', marginBottom: '20px'}}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-lg text-gray-700" style={{marginTop: '10px'}}>
-                      "I believe that astrology deserves much more attention in a person's life..."
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
         </div>
 
         {/* Next Steps */}
@@ -1898,7 +1072,6 @@ function ConfirmedPageContent() {
             </div>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Video Modal */}
