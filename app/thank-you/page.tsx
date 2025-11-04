@@ -893,6 +893,7 @@ function ConfirmedPageContent() {
     <>
       {/* Load Wistia Scripts */}
       <Script src="https://fast.wistia.com/player.js" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/stovjoibtn.js" type="module" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/09txw2012g.js" type="module" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/ormeqz4rv7.js" type="module" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/1divne826c.js" type="module" strategy="afterInteractive" />
@@ -929,12 +930,9 @@ function ConfirmedPageContent() {
           <div className="max-w-4xl mx-auto mb-4">
             <div className="overflow-hidden">
               <div className="rounded-2xl md:border-8 md:border-gray-900 overflow-hidden">
-                <CustomVideoPlayer
-                  videoSrc="/api/video-s3?url=https%3A%2F%2Fastroforyou.s3.us-east-2.amazonaws.com%2FThank%2Byou%2BVSL.mp4"
-                  videoId="main-vsl"
+                <WistiaVideoPlayer
+                  mediaId="stovjoibtn"
                   className="w-full h-full"
-                  autoPreload={true}
-                  poster="/video-previews/main-vsl.jpg"
                 />
               </div>
             </div>
