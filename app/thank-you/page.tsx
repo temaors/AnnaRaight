@@ -123,7 +123,8 @@ function ConfirmedPageContent() {
       startTime: 0,
       poster: '/video-previews/olga.jpg',
       quote: '"The way she delivers the material is amazing!"',
-      avatarLetter: 'M'
+      avatarLetter: 'M',
+      wistiaMediaId: 'fvdizgghlg'
     },
     {
       id: 'zhenya',
@@ -890,6 +891,7 @@ function ConfirmedPageContent() {
       <Script src="https://fast.wistia.com/player.js" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/09txw2012g.js" type="module" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/v6p9r70tof.js" type="module" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/fvdizgghlg.js" type="module" strategy="afterInteractive" />
 
       <div className="min-h-screen bg-white">
         {/* Header with Logo and Warning */}
