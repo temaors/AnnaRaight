@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 import { parseISO } from 'date-fns';
+import Script from 'next/script';
 import {
   formatTime,
   toggleFullscreen,
@@ -82,7 +83,8 @@ function ConfirmedPageContent() {
       startTime: 0,
       poster: '/video-previews/julia.jpg',
       quote: '"Thank you, my teacher, for teaching me not just analytics, but also self-confidence and a desire to help people."',
-      avatarLetter: 'S'
+      avatarLetter: 'S',
+      wistiaMediaId: '09txw2012g'
     },
     {
       id: 'valeria',
@@ -134,7 +136,8 @@ function ConfirmedPageContent() {
       startTime: 0,
       poster: '/video-previews/zhenya.jpg',
       quote: '"I wholeheartedly recommend her school."',
-      avatarLetter: 'V'
+      avatarLetter: 'V',
+      wistiaMediaId: 'v6p9r70tof'
     },
     {
       id: 'olga2',
@@ -174,6 +177,32 @@ function ConfirmedPageContent() {
     setSelectedVideo(null);
   };
 
+  // Wistia Video Player Component
+  const WistiaVideoPlayer = ({ mediaId, className = "" }: {
+    mediaId: string;
+    className?: string;
+  }) => {
+    return (
+      <div className={`relative bg-black overflow-hidden aspect-video ${className}`}>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            wistia-player[media-id='${mediaId}']:not(:defined) {
+              background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/${mediaId}/swatch');
+              display: block;
+              filter: blur(5px);
+              padding-top: 56.25%;
+            }
+          `
+        }} />
+        <wistia-player
+          media-id={mediaId}
+          seo="false"
+          aspect="1.7777777777777777"
+          className="w-full h-full"
+        ></wistia-player>
+      </div>
+    );
+  };
 
   // Custom Video Player Component with local state
   const CustomVideoPlayer = ({ videoSrc, startTime = 0, videoId, className = "", autoPreload = false, poster }: {
@@ -856,15 +885,21 @@ function ConfirmedPageContent() {
   // ];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header with Logo and Warning */}
-      <div className="mt-4 md:mt-0 pt-0 md:pt-6 px-4 md:px-8 text-center">
-        <div className="flex justify-center pb-12 md:pb-0">
-          <img src="/image.png" alt="Logo" width={180} height={45} />
+    <>
+      {/* Load Wistia Scripts */}
+      <Script src="https://fast.wistia.com/player.js" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/09txw2012g.js" type="module" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/v6p9r70tof.js" type="module" strategy="afterInteractive" />
+
+      <div className="min-h-screen bg-white">
+        {/* Header with Logo and Warning */}
+        <div className="mt-4 md:mt-0 pt-0 md:pt-6 px-4 md:px-8 text-center">
+          <div className="flex justify-center pb-12 md:pb-0">
+            <img src="/image.png" alt="Logo" width={180} height={45} />
+          </div>
+          <p className="text-base md:text-3xl font-extrabold md:font-black -mt-8 md:mt-0" style={{color: 'rgb(223, 17, 17)'}}>Wait! Your booking is not yet complete!</p>
+          <div className="w-full h-px bg-gray-300 mt-2 md:mt-4 mb-2 md:mb-4"></div>
         </div>
-        <p className="text-base md:text-3xl font-extrabold md:font-black -mt-8 md:mt-0" style={{color: 'rgb(223, 17, 17)'}}>Wait! Your booking is not yet complete!</p>
-        <div className="w-full h-px bg-gray-300 mt-2 md:mt-4 mb-2 md:mb-4"></div>
-      </div>
 
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 text-center">
@@ -991,7 +1026,9 @@ function ConfirmedPageContent() {
                 videoSrc={video.file}
                 poster={video.poster}
                 avatarLetter={video.avatarLetter}
+                wistiaMediaId={video.wistiaMediaId}
                 CustomVideoPlayer={CustomVideoPlayer}
+                WistiaVideoPlayer={WistiaVideoPlayer}
               />
             ))}
           </div>
@@ -1100,6 +1137,7 @@ function ConfirmedPageContent() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

@@ -8,11 +8,16 @@ interface TestimonialCardProps {
   videoSrc: string;
   poster?: string;
   avatarLetter: string;
+  wistiaMediaId?: string;
   CustomVideoPlayer: React.ComponentType<{
     videoSrc: string;
     videoId: string;
     className?: string;
     poster?: string;
+  }>;
+  WistiaVideoPlayer?: React.ComponentType<{
+    mediaId: string;
+    className?: string;
   }>;
 }
 
@@ -23,7 +28,9 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
   videoSrc,
   poster,
   avatarLetter,
-  CustomVideoPlayer
+  wistiaMediaId,
+  CustomVideoPlayer,
+  WistiaVideoPlayer
 }) => {
   return (
     <div className="bg-white lg:bg-gray-50 rounded-2xl p-6 lg:p-12 relative shadow-xl">
@@ -32,12 +39,19 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
         <div className="bg-white rounded-2xl overflow-hidden shadow-lg" style={{width: '100%', maxWidth: '400px', margin: '0 auto'}}>
           {/* Video Section */}
           <div className="relative">
-            <CustomVideoPlayer
-              videoSrc={videoSrc}
-              videoId={`${videoId}-mobile`}
-              className="w-full h-full aspect-video"
-              poster={poster}
-            />
+            {wistiaMediaId && WistiaVideoPlayer ? (
+              <WistiaVideoPlayer
+                mediaId={wistiaMediaId}
+                className="w-full h-full aspect-video"
+              />
+            ) : (
+              <CustomVideoPlayer
+                videoSrc={videoSrc}
+                videoId={`${videoId}-mobile`}
+                className="w-full h-full aspect-video"
+                poster={poster}
+              />
+            )}
           </div>
 
           {/* Content Section */}
@@ -69,12 +83,19 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
           {/* Video Player Left */}
           <div className="relative w-full">
             <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{width: '400px', height: '270px'}}>
-              <CustomVideoPlayer
-                videoSrc={videoSrc}
-                videoId={`${videoId}-desktop`}
-                className="w-full h-full"
-                poster={poster}
-              />
+              {wistiaMediaId && WistiaVideoPlayer ? (
+                <WistiaVideoPlayer
+                  mediaId={wistiaMediaId}
+                  className="w-full h-full"
+                />
+              ) : (
+                <CustomVideoPlayer
+                  videoSrc={videoSrc}
+                  videoId={`${videoId}-desktop`}
+                  className="w-full h-full"
+                  poster={poster}
+                />
+              )}
             </div>
           </div>
 
