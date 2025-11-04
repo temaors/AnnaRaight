@@ -97,7 +97,8 @@ function ConfirmedPageContent() {
       startTime: 0,
       poster: '/video-previews/valeria.jpg',
       quote: '"I recommend this course"',
-      avatarLetter: 'Z'
+      avatarLetter: 'Z',
+      wistiaMediaId: 'ormeqz4rv7'
     },
     {
       id: 'irina',
@@ -110,7 +111,8 @@ function ConfirmedPageContent() {
       startTime: 0,
       poster: '/video-previews/irina.jpg',
       quote: '"She is a teacher with a big heart."',
-      avatarLetter: 'O'
+      avatarLetter: 'O',
+      wistiaMediaId: '1divne826c'
     },
     {
       id: 'olga',
@@ -151,7 +153,8 @@ function ConfirmedPageContent() {
       startTime: 0,
       poster: '/video-previews/olga2.jpg',
       quote: '"Now I know exactly who I am and what I want. I don\'t need any rituals for that — astrology has already revealed everything… and more."',
-      avatarLetter: 'A'
+      avatarLetter: 'A',
+      wistiaMediaId: '50xwr8o68f'
     },
     {
       id: 'vladimir',
@@ -164,7 +167,8 @@ function ConfirmedPageContent() {
       startTime: 0,
       poster: '/video-previews/vladimir.jpg',
       quote: '"I believe that astrology deserves much more attention in a person\'s life..."',
-      avatarLetter: 'D'
+      avatarLetter: 'D',
+      wistiaMediaId: '7p9rmlx0ob'
     }
   ], []);
 
@@ -890,8 +894,12 @@ function ConfirmedPageContent() {
       {/* Load Wistia Scripts */}
       <Script src="https://fast.wistia.com/player.js" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/09txw2012g.js" type="module" strategy="afterInteractive" />
-      <Script src="https://fast.wistia.com/embed/v6p9r70tof.js" type="module" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/ormeqz4rv7.js" type="module" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/1divne826c.js" type="module" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/fvdizgghlg.js" type="module" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/v6p9r70tof.js" type="module" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/50xwr8o68f.js" type="module" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/7p9rmlx0ob.js" type="module" strategy="afterInteractive" />
 
       <div className="min-h-screen bg-white">
         {/* Header with Logo and Warning */}
