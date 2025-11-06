@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
-import { whcEmailManager } from '@/lib/email-whc';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const email = searchParams.get('email') || 'test@example.com';
-  
+
   try {
+    // Dynamic import to avoid edge runtime issues
+    const { emailManager } = await import('@/lib/email/email-manager');
+
     // Используем sendVideoEmail для теста
     const testVideoUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://annaraight.com'}/v/watch?test=true`;
-    const result = await whcEmailManager.sendVideoEmail(
+    const result = await emailManager.sendVideoEmail(
       email,
       'Test User',
       testVideoUrl

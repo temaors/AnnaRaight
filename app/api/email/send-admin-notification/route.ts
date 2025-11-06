@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { whcEmailManager } from '@/lib/email-whc';
 
 interface AppointmentData {
   name: string;
@@ -46,9 +45,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Initialize email manager
-        // Send admin notification
-    const result = await whcEmailManager.sendAdminNotification(appointmentData);
+    // Dynamic import to avoid edge runtime issues
+    const { emailManager } = await import('@/lib/email/email-manager');
+
+    // Send admin notification
+    const result = await emailManager.sendAdminNotification(appointmentData);
 
     if (result.success) {
       return NextResponse.json({ success: true });

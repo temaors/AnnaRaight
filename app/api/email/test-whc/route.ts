@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { whcEmailManager } from '@/lib/email-whc';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { action } = body;
 
+    // Dynamic import to avoid edge runtime issues
+    const { emailManager } = await import('@/lib/email/email-manager');
+
     switch (action) {
       case 'test_connection':
-        const connectionResult = await whcEmailManager.testConnection();
+        const connectionResult = await emailManager.testConnection();
         return NextResponse.json(connectionResult);
 
       case 'send_test_email':
-        const testResult = await whcEmailManager.sendTestEmail();
+        const testResult = await emailManager.sendTestEmail();
         return NextResponse.json(testResult);
 
       default:
@@ -33,7 +35,10 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const connectionResult = await whcEmailManager.testConnection();
+    // Dynamic import to avoid edge runtime issues
+    const { emailManager } = await import('@/lib/email/email-manager');
+
+    const connectionResult = await emailManager.testConnection();
     return NextResponse.json(connectionResult);
   } catch (error) {
     console.error('Error testing WHC email connection:', error);

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { whcEmailManager } from '@/lib/email-whc';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,8 +19,11 @@ export async function POST(request: NextRequest) {
     console.log(`📧 [REMINDER EMAIL API] Sending reminder email to ${email}`);
     console.log(`📧 [REMINDER EMAIL API] Video URL: ${finalVideoUrl}`);
 
+    // Dynamic import to avoid edge runtime issues
+    const { emailManager } = await import('@/lib/email/email-manager');
+
     // Send reminder email
-    const emailResult = await whcEmailManager.sendVideoReminderEmail(email, firstName, finalVideoUrl);
+    const emailResult = await emailManager.sendVideoReminderEmail(email, firstName, finalVideoUrl);
 
     if (emailResult.success) {
       console.log(`✅ [REMINDER EMAIL API] Reminder email sent successfully to ${email}`);

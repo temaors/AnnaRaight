@@ -3,11 +3,13 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { smsService } from '@/lib/sms';
-import { whcEmailManager } from '@/lib/email-whc';
 
 export async function POST() {
   try {
     console.log('🔄 Processing appointment reminders...');
+
+    // Dynamic import to avoid edge runtime issues
+    const { emailManager } = await import('@/lib/email/email-manager');
     
     // Initialize database
     const dataDir = path.join(process.cwd(), 'data');
@@ -77,7 +79,7 @@ export async function POST() {
                 meeting_id: String(appointment.meeting_id || '')
               };
 
-              const emailResult = await whcEmailManager.sendAppointmentReminder(appointmentForEmail);
+              const emailResult = await emailManager.sendAppointmentReminderEmail(appointmentForEmail);
 
               if (emailResult.success) {
                 // Update database - mark email reminder as sent

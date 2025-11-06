@@ -132,15 +132,15 @@ export async function POST(request: NextRequest) {
     if (leadData.videoUrl) {
       try {
         // Dynamic import with error handling
-        let whcEmailManager;
-        // let reminderScheduler; // DISABLED - reminder scheduling removed to prevent email spam
-        
+        let emailManager;
+        let reminderScheduler;
+
         try {
-          const emailModule = await import('@/lib/email-whc');
-          whcEmailManager = emailModule.whcEmailManager;
-          
-          // const reminderModule = await import('@/lib/reminder-scheduler');
-          // reminderScheduler = reminderModule.reminderScheduler;
+          const emailModule = await import('@/lib/email/email-manager');
+          emailManager = emailModule.emailManager;
+
+          const reminderModule = await import('@/lib/reminder-scheduler');
+          reminderScheduler = reminderModule.reminderScheduler;
         } catch (importError) {
           console.error('Failed to import email modules:', importError);
           emailResult = { success: false, error: `Module import failed: ${importError instanceof Error ? importError.message : 'Unknown import error'}` };
@@ -152,28 +152,30 @@ export async function POST(request: NextRequest) {
             email_result: emailResult
           });
         }
-        
+
         // Create the video URL with user data
         const videoUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://annaraight.com'}/video/?firstName=${encodeURIComponent(leadData.firstName)}&email=${encodeURIComponent(leadData.email)}`;
         console.log('🔗 [DEBUG] BASE_URL env:', process.env.NEXT_PUBLIC_BASE_URL);
         console.log('🔗 [DEBUG] Generated videoUrl:', videoUrl);
-        
-        emailResult = await whcEmailManager.sendWelcomeEmail(
+
+        emailResult = await emailManager.sendWelcomeEmail(
           leadData.email,
           leadData.firstName,
           videoUrl
         );
         console.log(`Welcome email sent to ${leadData.email}:`, emailResult);
-        
-        // Schedule 5-minute reminder email if welcome email was sent successfully - DISABLED to prevent email spam
-        // if (emailResult.success) {
-        //   const reminderResult = reminderScheduler.scheduleVideoReminder(
-        //     leadData.email,
-        //     leadData.firstName,
-        //     videoUrl
-        //   );
-        //   console.log(`5-minute reminder scheduled for ${leadData.email}:`, reminderResult);
-        // }
+
+        // Schedule reminder emails if welcome email was sent successfully
+        // Using testMode=true for 5-minute intervals (change to false for production intervals)
+        if (emailResult.success) {
+          const reminderResult = reminderScheduler.scheduleVideoReminder(
+            leadData.email,
+            leadData.firstName,
+            videoUrl,
+            true // testMode=true for 5-minute intervals
+          );
+          console.log(`📅 First reminder scheduled for ${leadData.email}:`, reminderResult);
+        }
       } catch (emailError) {
         console.error('Email error (non-fatal):', emailError);
         emailResult = { success: false, error: String(emailError) };

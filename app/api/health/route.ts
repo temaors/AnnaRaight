@@ -49,10 +49,10 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      await import('@/lib/email-whc');
+      await import('@/lib/email/email-manager');
       healthCheck.modules.emailWhc = true;
     } catch (e) {
-      console.log('email-whc import failed:', e.message);
+      console.log('email-manager import failed:', e.message);
     }
 
     try {

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { invoiceManager } from '@/lib/invoice-manager';
-import { whcEmailManager } from '@/lib/email-whc';
 import Database from 'better-sqlite3';
 import path from 'path';
 
@@ -27,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Get lead name
     const db = new Database(path.join(process.cwd(), 'data', 'funnel.db'));
     let leadName = '';
-    
+
     try {
       const lead = db.prepare('SELECT name FROM leads WHERE id = ?').get(invoice.lead_id) as { name: string } | undefined;
       leadName = lead?.name || '';
@@ -35,10 +34,13 @@ export async function POST(request: NextRequest) {
       db.close();
     }
 
+    // Dynamic import to avoid edge runtime issues
+    const { emailManager } = await import('@/lib/email/email-manager');
+
     // Send invoice email
     const invoiceUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/invoice/${invoice.invoice_number}`;
-    
-    const emailResult = await whcEmailManager.sendInvoiceEmail({
+
+    const emailResult = await emailManager.sendInvoiceEmail({
       invoice_number: invoice.invoice_number,
       email: invoice.email,
       name: leadName,

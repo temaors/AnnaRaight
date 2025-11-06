@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { whcEmailManager } from '@/lib/email-whc';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,9 +31,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize email manager
-        // Send video email
-    const result = await whcEmailManager.sendVideoEmail(email, firstName, videoUrl);
+    // Dynamic import to avoid edge runtime issues
+    const { emailManager } = await import('@/lib/email/email-manager');
+
+    // Send video email
+    const result = await emailManager.sendVideoEmail(email, firstName, videoUrl);
 
     if (result.success) {
       return NextResponse.json({ success: true });

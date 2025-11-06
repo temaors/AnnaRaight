@@ -336,10 +336,10 @@ export async function POST(request: NextRequest) {
 
     try {
       console.log('📧 Starting email sending process...');
-      
+
       // Dynamic import of email manager
-      const { whcEmailManager } = await import('@/lib/email-whc');
-      
+      const { emailManager } = await import('@/lib/email/email-manager');
+
       // Add Google Meet link from calendar result to appointmentData
       if (calendarResult.google_meet_link) {
         appointmentData.google_meet_link = calendarResult.google_meet_link;
@@ -350,12 +350,12 @@ export async function POST(request: NextRequest) {
 
       console.log('📧 Sending confirmation email to:', appointmentData.email);
       // Send confirmation email to client
-      emailResult = await whcEmailManager.sendAppointmentConfirmation(appointmentData);
+      emailResult = await emailManager.sendAppointmentConfirmationEmail(appointmentData);
       console.log(`✅ Appointment confirmation email sent to ${appointmentData.email}:`, emailResult);
 
       console.log('📧 Sending admin notification...');
       // Send admin notification
-      const adminResult = await whcEmailManager.sendAdminNotification(appointmentData);
+      const adminResult = await emailManager.sendAdminNotification(appointmentData);
       console.log(`✅ Admin notification email sent:`, adminResult);
 
       console.log('📧 Email sending process completed successfully');
@@ -376,6 +376,16 @@ export async function POST(request: NextRequest) {
     } catch (statusError) {
       console.error('❌ Error updating lead status:', statusError);
       // Continue even if status update fails
+    }
+
+    // Cancel all pending email reminders for this user since they scheduled an appointment
+    try {
+      const { reminderScheduler } = await import('@/lib/reminder-scheduler');
+      const cancelResult = reminderScheduler.cancelAllReminders(appointmentData.email);
+      console.log('📅 Cancelled pending reminders:', cancelResult);
+    } catch (cancelError) {
+      console.error('❌ Error cancelling reminders:', cancelError);
+      // Continue even if cancellation fails
     }
 
     // Schedule appointment reminder (5 minutes from now)

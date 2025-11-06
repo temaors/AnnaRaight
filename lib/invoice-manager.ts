@@ -4,7 +4,6 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { stripe, createOrRetrieveCustomer } from './stripe-config';
 import { statusManager } from './status-manager';
-import { whcEmailManager } from './email-whc';
 
 export interface InvoiceItem {
   id?: number;
@@ -528,7 +527,7 @@ export class InvoiceManager {
 
       const invoiceUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/invoice/${invoice.invoice_number}`;
       console.log(`🔗 Invoice URL: ${invoiceUrl}`);
-      
+
       console.log(`⚙️ Preparing email data for invoice ${invoice.invoice_number}...`);
       const emailData = {
         invoice_number: invoice.invoice_number,
@@ -544,9 +543,11 @@ export class InvoiceManager {
         post_payment_content: invoice.post_payment_content,
         post_payment_content_enabled: invoice.post_payment_content_enabled
       };
-      
-      console.log(`📤 Sending invoice email via WHC email manager...`);
-      const emailResult = await whcEmailManager.sendInvoiceEmail(emailData);
+
+      console.log(`📤 Sending invoice email via email manager...`);
+      // Dynamic import to avoid circular dependencies
+      const { emailManager } = await import('./email/email-manager');
+      const emailResult = await emailManager.sendInvoiceEmail(emailData);
 
       if (emailResult.success) {
         console.log(`✅ Invoice email sent successfully to ${invoice.email}`);
