@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Default video URL if not provided
-    const defaultVideoUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://annaraight.com'}/video/?firstName=${encodeURIComponent(firstName)}&email=${encodeURIComponent(email)}`;
+    const defaultVideoUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://annaraight.com'}/video/?firstName=${encodeURIComponent(firstName)}&email=${encodeURIComponent(email)}`;
     const finalVideoUrl = videoUrl || defaultVideoUrl;
 
     console.log(`📧 [WELCOME EMAIL API] Sending welcome email to ${email}`);

@@ -350,7 +350,7 @@ class EmailManager {
                     </div>
                     
                     <div style="text-align: center; margin-top: 25px;">
-                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://annaraight.com'}/auth/sign-in" 
+                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://annaraight.com'}/auth/sign-in" 
                            style="display: inline-block; background: #667eea; color: white; padding: 15px 30px; 
                                   text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
                             🔑 Sign In to Account

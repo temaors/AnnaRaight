@@ -578,7 +578,7 @@ class ReminderScheduler {
 
         
         // Send video reminder email via API call (existing logic)
-        response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://annaraight.com'}/api/reminder-email`, {
+        response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://annaraight.com'}/api/reminder-email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

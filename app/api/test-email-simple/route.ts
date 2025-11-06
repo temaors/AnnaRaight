@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const { emailManager } = await import('@/lib/email/email-manager');
 
     // Используем sendVideoEmail для теста
-    const testVideoUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://annaraight.com'}/v/watch?test=true`;
+    const testVideoUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://annaraight.com'}/v/watch?test=true`;
     const result = await emailManager.sendVideoEmail(
       email,
       'Test User',

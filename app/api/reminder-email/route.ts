@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Default video URL if not provided
-    const defaultVideoUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://annaraight.com'}/v/watch?firstName=${encodeURIComponent(firstName)}&email=${encodeURIComponent(email)}`;
+    const defaultVideoUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://annaraight.com'}/v/watch?firstName=${encodeURIComponent(firstName)}&email=${encodeURIComponent(email)}`;
     const finalVideoUrl = videoUrl || defaultVideoUrl;
 
     console.log(`📧 [REMINDER EMAIL API] Sending reminder email to ${email}`);
