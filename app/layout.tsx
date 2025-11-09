@@ -101,10 +101,20 @@ export default function RootLayout({
             }
           `}
         </Script>
+        <Script id="smartlook" strategy="afterInteractive">
+          {`
+            window.smartlook||(function(d) {
+              var o=smartlook=function(){ o.api.push(arguments)},h=d.getElementsByTagName('head')[0];
+              var c=d.createElement('script');o.api=new Array();c.async=true;c.type='text/javascript';
+              c.charset='utf-8';c.src='https://web-sdk.smartlook.com/recorder.js';h.appendChild(c);
+              })(document);
+              smartlook('init', 'f740f9f9797dac88062abca7c86b05079a3140c7', { region: 'eu' });
+          `}
+        </Script>
         <noscript>
-          <img 
-            height="1" 
-            width="1" 
+          <img
+            height="1"
+            width="1"
             style={{display: 'none'}}
             src="https://www.facebook.com/tr?id=1354683712779785&ev=PageView&noscript=1"
           />
