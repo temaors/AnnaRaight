@@ -27,27 +27,8 @@ export default function StartPage() {
         </div>
 
         {/* Main Content Section */}
-        <div className="grid lg:grid-cols-2 gap-8 items-start mb-8">
-          {/* Left Column - Speaker Image */}
-          <div className="relative hidden lg:block">
-            <div className="bg-gray-100 rounded-lg overflow-hidden shadow-lg">
-              {/* Speaker Image */}
-              <div className="aspect-video relative">
-                <img 
-                  src="/speaker.jpg" 
-                  alt="Anna Raight - Master of Astrology"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-            
-            {/* Caption under image */}
-            <p className="text-xs text-black mt-3 leading-none md:leading-tight font-light text-center mb-4">
-              Anna Raight, Master of Astrology, founder of AstroForYou professional astrological service to 95,000 users while serving 5,000+ clients across 40 countries. She&apos;s certified 400+ practitioners now earning $5,000-$15,000/month from home. In this training, she shares the Reality Management method creating a new generation of professional astrologers.
-            </p>
-          </div>
-
-          {/* Right Column - Lead Capture Form */}
+        <div className="max-w-2xl mx-auto mb-8">
+          {/* Lead Capture Form */}
           <div className="bg-white mt-2 lg:mt-0">
             <div className="mb-1 lg:mb-6 text-center lg:text-left">
               <h3 className="text-xs lg:text-lg font-black lg:font-extrabold text-gray-900 mb-1 leading-none md:leading-tight lg:pl-12">
