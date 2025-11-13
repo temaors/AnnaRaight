@@ -8,13 +8,8 @@ export default function StartPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header with Logo */}
-      <div className="flex justify-center px-8 pt-6 mb-8 md:mb-4">
-        <img src="/image.png" alt="Logo" width={180} height={45} />
-      </div>
-
       {/* Target Audience */}
-      <div className="text-center mb-6" style={{marginBottom: '0.5cm'}}>
+      <div className="text-center mb-6 pt-6" style={{marginBottom: '0.5cm'}}>
         <p className="text-black text-base leading-tight">Zero-Risk Astrology Certification Opportunity</p>
       </div>
 
