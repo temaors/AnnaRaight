@@ -8,8 +8,13 @@ export default function StartPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Header with Logo */}
+      <div className="flex justify-center px-8 pt-6 mb-8 md:mb-4">
+        <img src="/image.png" alt="Logo" width={180} height={45} />
+      </div>
+
       {/* Target Audience */}
-      <div className="text-center mb-6 pt-6" style={{marginBottom: '0.5cm'}}>
+      <div className="text-center mb-6" style={{marginBottom: '0.5cm'}}>
         <p className="text-black text-base leading-tight">Zero-Risk Astrology Certification Opportunity</p>
       </div>
 
@@ -23,24 +28,6 @@ export default function StartPage() {
           </h1>
           <p className="text-sm md:text-2xl text-black italic font-light md:font-normal leading-none md:leading-normal" style={{marginBottom: '0.5cm'}}>
             ...Using The Only Mathematically-Proven Astrology System Recognized By Scientists
-          </p>
-        </div>
-
-        {/* Mobile Speaker Image - Only visible on mobile */}
-        <div className="block lg:hidden mb-6 px-4">
-          <div className="bg-gray-100 rounded-lg overflow-hidden shadow-lg">
-            <div className="aspect-video relative">
-              <img 
-                src="/speaker.jpg" 
-                alt="Anna Raight - Master of Astrology"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-          
-          {/* Mobile Caption under image */}
-          <p className="text-xs text-black mt-3 leading-tight font-light text-center px-2 mb-6">
-            Anna Raight, Master of Astrology, founder of AstroForYou professional astrological service to 95,000 users while serving 5,000+ clients across 40 countries.
           </p>
         </div>
 
