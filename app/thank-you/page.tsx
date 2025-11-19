@@ -718,95 +718,6 @@ function ConfirmedPageContent() {
     );
   };
 
-
-  // Render video preview component (unused but kept for potential future use)
-  // const renderVideoPreview = (video: typeof testimonialVideos[0], index: number) => {
-  //   const colorClasses = {
-  //     purple: 'bg-purple-600 hover:bg-purple-700',
-  //     blue: 'bg-blue-600 hover:bg-blue-700',
-  //     green: 'bg-green-600 hover:bg-green-700',
-  //     pink: 'bg-pink-600 hover:bg-pink-700',
-  //     orange: 'bg-orange-600 hover:bg-orange-700',
-  //     teal: 'bg-teal-600 hover:bg-teal-700'
-  //   };
-  // 
-  //   const controlBgClasses = {
-  //     purple: 'bg-purple-600',
-  //     blue: 'bg-blue-600',
-  //     green: 'bg-green-600',
-  //     pink: 'bg-pink-600',
-  //     orange: 'bg-orange-600',
-  //     teal: 'bg-teal-600'
-  //   };
-  // 
-  //   const progressBgClasses = {
-  //     purple: 'bg-purple-500',
-  //     blue: 'bg-blue-500',
-  //     green: 'bg-green-500',
-  //     pink: 'bg-pink-500',
-  //     orange: 'bg-orange-500',
-  //     teal: 'bg-teal-500'
-  //   };
-
-  //   return (
-  //     <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-  //       {/* Video Content */}
-  //       <div className="aspect-video relative overflow-hidden">
-  //         {/* Video Preview */}
-  //         <video
-  //           src={video.file}
-  //           className="w-full h-full object-cover"
-  //           muted
-  //           preload="metadata"
-  //           playsInline
-  //         />
-  //         
-  //         {/* Dark Overlay */}
-  //         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-  //         
-  //         {/* Play Button */}
-  //         <div className="absolute inset-0 flex items-center justify-center">
-  //           <div 
-  //             className={`w-20 h-20 ${colorClasses[video.color as keyof typeof colorClasses]} rounded-full flex items-center justify-center shadow-lg transition-colors cursor-pointer`}
-  //             onClick={() => openVideoModal(video.file)}
-  //           >
-  //             <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
-  //               <path d="M8 5v10l7-5z"/>
-  //             </svg>
-  //           </div>
-  //         </div>
-  //         
-  //       </div>
-  //       
-  //       {/* Video Controls */}
-  //       <div className={`${controlBgClasses[video.color as keyof typeof controlBgClasses]} px-4 py-2 flex items-center justify-between text-white text-sm`}>
-  //         <div className="flex items-center space-x-3">
-  //           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-  //             <path d="M8 5v10l7-5z"/>
-  //           </svg>
-  //           <span>{video.duration}</span>
-  //         </div>
-  //         <div className="flex-1 mx-4">
-  //           <div className={`${progressBgClasses[video.color as keyof typeof progressBgClasses]} h-1 rounded-full`}>
-  //             <div className="bg-white h-1 rounded-full w-1/4"></div>
-  //           </div>
-  //         </div>
-  //         <div className="flex items-center space-x-2">
-  //           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-  //             <path d="M3 4h2v12H3V4zm4 0h2v12H7V4zm4 0h2v12h-2V4zm4 0h2v12h-2V4z"/>
-  //           </svg>
-  //           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-  //             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-  //           </svg>
-  //           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-  //             <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4z"/>
-  //           </svg>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // };
-
   useEffect(() => {
     // Track page visit only once
     const trackVisit = async () => {
@@ -854,41 +765,6 @@ function ConfirmedPageContent() {
     router.push('/funnel/checkout');
   };
 
-
-  // Sample video data - replace with actual content (unused but kept for reference)
-  // const videoSections = [
-  //   {
-  //     title: "What Is FunnelMaster Training System",
-  //     duration: "5:42",
-  //     thumbnail: "/placeholder-video.jpg"
-  //   },
-  //   {
-  //     title: "Step 1: Market Research Framework",
-  //     duration: "8:15",
-  //     thumbnail: "/placeholder-video.jpg"
-  //   },
-  //   {
-  //     title: "Step 2: Content Creation System",
-  //     duration: "12:30",
-  //     thumbnail: "/placeholder-video.jpg"
-  //   },
-  //   {
-  //     title: "Step 3: Lead Generation Automation",
-  //     duration: "9:45",
-  //     thumbnail: "/placeholder-video.jpg"
-  //   },
-  //   {
-  //     title: "Step 4: Sales Process Optimization",
-  //     duration: "15:20",
-  //     thumbnail: "/placeholder-video.jpg"
-  //   },
-  //   {
-  //     title: "Step 5: Client Fulfillment System",
-  //     duration: "11:10",
-  //     thumbnail: "/placeholder-video.jpg"
-  //   }
-  // ];
-
   return (
     <>
       {/* Load Wistia Scripts */}
@@ -917,17 +793,17 @@ function ConfirmedPageContent() {
         {/* Step Headline */}
         <div className="mb-4 md:mb-6">
           <h1 className="text-xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-1 md:mb-4">
-            Step #1 Of 2: Watch The Video Below
+            Step #1 Of 2: Add The Event To Your Calendar
           </h1>
-          <p className="text-xs md:text-2xl text-black md:tracking-normal -mt-1 md:mt-0" style={{letterSpacing: '-1px'}}>
+          {/* <p className="text-xs md:text-2xl text-black md:tracking-normal -mt-1 md:mt-0" style={{letterSpacing: '-1px'}}>
             <span className="md:tracking-normal md:letter-spacing-normal">Please Watch The Video Below To <span className="underline">Confirm Your Consultation</span></span>
-          </p>
+          </p> */}
         </div>
 
         {/* Video Section */}
         <div className="mb-12">
           {/* Video Container */}
-          <div className="max-w-4xl mx-auto mb-4">
+          {/* <div className="max-w-4xl mx-auto mb-4">
             <div className="overflow-hidden">
               <div className="rounded-2xl md:border-8 md:border-gray-900 overflow-hidden">
                 <WistiaVideoPlayer
@@ -936,18 +812,18 @@ function ConfirmedPageContent() {
                 />
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Reservation Notice */}
-          <div className="mb-4 md:mb-2">
+          {/* <div className="mb-4 md:mb-2">
             <p className="text-xs md:text-base font-black md:font-semibold text-gray-800">Your Call Is Reserved For The Next:</p>
-          </div>
+          </div> */}
 
           {/* Important Notice */}
           <div className="mb-6 md:mb-12 mt-4 md:mt-8">
-            <p className="text-base md:text-5xl font-black md:font-bold mb-3 md:mb-6">
+            {/* <p className="text-base md:text-5xl font-black md:font-bold mb-3 md:mb-6">
               <span className="md:text-red-600" style={{color: 'rgb(223, 17, 17)'}}>IMPORTANT:</span> <span className="text-black">Add The Event To Your Calendar</span>
-            </p>
+            </p> */}
             <p className="text-sm md:text-2xl font-light md:font-normal text-black mb-6 md:mb-8 max-w-4xl mx-auto px-2 md:px-0 leading-tight md:leading-normal -mt-2 md:mt-0">
               To add the event to your calendar you need to go to your email, open the email that says &quot;Invitation from an unknown sender&quot; from an <span className="underline">@annaraight.com</span> domain and click &quot;Add To Calendar&quot;
             </p>
@@ -955,7 +831,6 @@ function ConfirmedPageContent() {
             {/* Gmail Screenshot Mockup */}
             <div className="max-w-4xl mx-auto mb-6 md:mb-12">
               <div className="bg-white border border-gray-300 rounded-lg shadow-sm md:shadow-lg overflow-hidden">
-                {/* Gmail Header */}
                 <div className="bg-gray-50 px-2 md:px-4 py-2 md:py-3 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 md:space-x-3">
@@ -980,7 +855,6 @@ function ConfirmedPageContent() {
                   </div>
                 </div>
                 
-                {/* Email Content */}
                 <div className="p-3 md:p-6 bg-gray-100">
                   <div className="bg-white rounded-lg p-3 md:p-4 border border-gray-200">
                     <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4">
@@ -995,7 +869,6 @@ function ConfirmedPageContent() {
                         <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 rounded-lg font-medium text-sm md:text-base">
                           Add to calendar
                         </button>
-                        {/* Red circle highlight */}
                         <div className="absolute -inset-2 border-2 md:border-4 border-red-500 rounded-full animate-pulse"></div>
                       </div>
                       <button className="text-gray-600 hover:text-gray-800 px-4 py-2 text-sm md:text-base">
@@ -1151,8 +1024,6 @@ function ConfirmedPageContent() {
 
 // Force dynamic rendering - disable all caching
 export const dynamic = 'force-dynamic';
-// Version number - increment this when you make changes
-const PAGE_VERSION = '2.0.0';
 
 export default function ConfirmedPage() {
   return (
