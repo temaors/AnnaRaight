@@ -228,76 +228,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create tables if they don't exist
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS appointments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT NOT NULL,
-        phone TEXT,
-        website TEXT,
-        revenue TEXT,
-        appointment_date TEXT NOT NULL,
-        appointment_time TEXT NOT NULL,
-        timezone TEXT DEFAULT 'Europe/Moscow',
-        status TEXT DEFAULT 'scheduled',
-        google_event_id TEXT,
-        google_meet_link TEXT,
-        meeting_id TEXT,
-        html_link TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      );
-      
-      CREATE TABLE IF NOT EXISTS leads (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT UNIQUE,
-        phone TEXT,
-        website TEXT,
-        revenue TEXT,
-        is_subscribed INTEGER DEFAULT 1,
-        status TEXT DEFAULT 'active',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-    
-    // Add missing columns if they don't exist (migration)
-    try {
-      db.exec(`ALTER TABLE appointments ADD COLUMN name TEXT`);
-      console.log('Added name column to appointments table');
-    } catch (alterError) {
-      // Column probably already exists, which is fine
-      console.log('Name column already exists or could not be added:', alterError instanceof Error ? alterError.message : 'Unknown error');
-    }
+    // Tables are already created by lib/database.ts, just verify they exist
+    // DO NOT recreate tables here - use the existing schema
 
-    // Insert appointment into database
-    const insertStmt = db.prepare(`
-      INSERT INTO appointments (
-        name, email, phone, website, revenue, 
-        appointment_date, appointment_time, timezone, status,
-        google_event_id, google_meet_link, meeting_id, html_link
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const result = insertStmt.run(
-      appointmentData.name,
-      appointmentData.email,
-      appointmentData.phone || null,
-      appointmentData.website || null,
-      appointmentData.revenue || null,
-      appointmentData.appointment_date,
-      appointmentData.appointment_time,
-      appointmentData.timezone,
-      'scheduled', // status
-      calendarResult.event_id || null,
-      calendarResult.google_meet_link || appointmentData.google_meet_link || null,
-      calendarResult.meeting_id || appointmentData.meeting_id || null,
-      calendarResult.html_link || null
-    );
-
-    // Get or create lead_id for status tracking
+    // First, get or create lead
     const leadStmt = db.prepare('SELECT id FROM leads WHERE email = ?');
     const leadRecord = leadStmt.get(appointmentData.email) as { id: number } | undefined;
     let leadId = leadRecord?.id;
@@ -308,18 +242,54 @@ export async function POST(request: NextRequest) {
         INSERT INTO leads (name, email, phone, website, revenue, created_at)
         VALUES (?, ?, ?, ?, ?, datetime('now'))
       `);
-      
+
       const leadResult = insertLeadStmt.run(
         appointmentData.name,
         appointmentData.email,
         appointmentData.phone || null,
         appointmentData.website || null,
-        appointmentData.revenue || null
+        appointmentData.currentIncome || appointmentData.revenue || null
       );
-      
+
       leadId = leadResult.lastInsertRowid as number;
       console.log('Created new lead with ID:', leadId);
+    } else {
+      // Update existing lead with new information
+      const updateLeadStmt = db.prepare(`
+        UPDATE leads
+        SET name = ?, phone = COALESCE(?, phone), website = COALESCE(?, website),
+            revenue = COALESCE(?, revenue), updated_at = datetime('now')
+        WHERE id = ?
+      `);
+
+      updateLeadStmt.run(
+        appointmentData.name,
+        appointmentData.phone || null,
+        appointmentData.website || null,
+        appointmentData.currentIncome || appointmentData.revenue || null,
+        leadId
+      );
+      console.log('Updated existing lead with ID:', leadId);
     }
+
+    // Insert appointment into database with lead_id
+    const insertStmt = db.prepare(`
+      INSERT INTO appointments (
+        lead_id, appointment_date, appointment_time, timezone, status,
+        google_event_id, google_meet_link, meeting_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const result = insertStmt.run(
+      leadId,
+      appointmentData.appointment_date,
+      appointmentData.appointment_time,
+      appointmentData.timezone,
+      'scheduled', // status
+      calendarResult.event_id || null,
+      calendarResult.google_meet_link || appointmentData.google_meet_link || null,
+      calendarResult.meeting_id || appointmentData.meeting_id || null
+    );
 
     // Safely close database
     try {

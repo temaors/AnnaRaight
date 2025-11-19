@@ -64,43 +64,64 @@ export async function GET() {
       // Fetch leads
       const leads = db.prepare('SELECT * FROM leads ORDER BY created_at DESC').all() as Lead[];
       
-      // Fetch appointments with proper structure
+      // Fetch appointments with proper structure using lead_id
       const appointmentsRaw = db.prepare(`
-        SELECT 
+        SELECT
           a.id,
-          a.name,
-          a.email,
+          l.name,
+          l.email,
           a.appointment_date,
           a.appointment_time,
           a.timezone,
           a.status,
           a.google_meet_link,
           a.meeting_id,
-          COALESCE(l.id, 0) as lead_id,
+          a.lead_id,
           CASE WHEN a.google_event_id IS NOT NULL THEN 1 ELSE 0 END as confirmation_sent,
-          0 as reminder_sent,
+          a.reminder_sent,
           a.created_at
         FROM appointments a
-        LEFT JOIN leads l ON l.email = a.email
+        LEFT JOIN leads l ON l.id = a.lead_id
         ORDER BY a.appointment_date DESC, a.appointment_time DESC
-      `).all() as { id: number; email: string; name: string; appointment_date: string; appointment_time: string; confirmation_sent: number; reminder_sent: number; created_at: string }[];
+      `).all() as { id: number; email: string; name: string; appointment_date: string; appointment_time: string; timezone: string; status: string; google_meet_link: string | null; meeting_id: string | null; lead_id: number; confirmation_sent: number; reminder_sent: number; created_at: string }[];
       
       // Calculate statistics
       const stats = {
         totalLeads: leads.length,
         totalAppointments: appointmentsRaw.length,
         confirmationsSent: appointmentsRaw.filter(apt => apt.confirmation_sent).length,
-        leadsToday: leads.filter(lead => 
+        leadsToday: leads.filter(lead =>
           lead.created_at.includes(new Date().toISOString().split('T')[0])
         ).length
       };
+
+      // Get data for chart - last 30 days
+      const chartData = db.prepare(`
+        WITH RECURSIVE dates(date) AS (
+          SELECT date('now', '-29 days')
+          UNION ALL
+          SELECT date(date, '+1 day')
+          FROM dates
+          WHERE date < date('now')
+        )
+        SELECT
+          dates.date,
+          COALESCE(COUNT(DISTINCT l.id), 0) as leads,
+          COALESCE(COUNT(DISTINCT a.id), 0) as appointments
+        FROM dates
+        LEFT JOIN leads l ON date(l.created_at) = dates.date
+        LEFT JOIN appointments a ON date(a.created_at) = dates.date
+        GROUP BY dates.date
+        ORDER BY dates.date ASC
+      `).all() as { date: string; leads: number; appointments: number }[];
 
       return NextResponse.json({
         success: true,
         data: {
           leads,
           appointments: appointmentsRaw,
-          stats
+          stats,
+          chartData
         }
       });
 
