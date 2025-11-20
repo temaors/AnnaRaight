@@ -769,7 +769,7 @@ function ConfirmedPageContent() {
     <>
       {/* Load Wistia Scripts */}
       <Script src="https://fast.wistia.com/player.js" strategy="afterInteractive" />
-      <Script src="https://fast.wistia.com/embed/stovjoibtn.js" type="module" strategy="afterInteractive" />
+      <Script src="https://fast.wistia.com/embed/xoj3wbp0ft.js" type="module" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/09txw2012g.js" type="module" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/ormeqz4rv7.js" type="module" strategy="afterInteractive" />
       <Script src="https://fast.wistia.com/embed/1divne826c.js" type="module" strategy="afterInteractive" />
@@ -793,37 +793,37 @@ function ConfirmedPageContent() {
         {/* Step Headline */}
         <div className="mb-4 md:mb-6">
           <h1 className="text-xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-1 md:mb-4">
-            Step #1 Of 2: Add The Event To Your Calendar
+            Step #1 Of 2: Watch The Video Below
           </h1>
-          {/* <p className="text-xs md:text-2xl text-black md:tracking-normal -mt-1 md:mt-0" style={{letterSpacing: '-1px'}}>
+          <p className="text-xs md:text-2xl text-black md:tracking-normal -mt-1 md:mt-0" style={{letterSpacing: '-1px'}}>
             <span className="md:tracking-normal md:letter-spacing-normal">Please Watch The Video Below To <span className="underline">Confirm Your Consultation</span></span>
-          </p> */}
+          </p>
         </div>
 
         {/* Video Section */}
         <div className="mb-12">
           {/* Video Container */}
-          {/* <div className="max-w-4xl mx-auto mb-4">
+          <div className="max-w-4xl mx-auto mb-4">
             <div className="overflow-hidden">
               <div className="rounded-2xl md:border-8 md:border-gray-900 overflow-hidden">
                 <WistiaVideoPlayer
-                  mediaId="stovjoibtn"
+                  mediaId="xoj3wbp0ft"
                   className="w-full h-full"
                 />
               </div>
             </div>
-          </div> */}
+          </div>
 
           {/* Reservation Notice */}
-          {/* <div className="mb-4 md:mb-2">
+          <div className="mb-4 md:mb-2">
             <p className="text-xs md:text-base font-black md:font-semibold text-gray-800">Your Call Is Reserved For The Next:</p>
-          </div> */}
+          </div>
 
           {/* Important Notice */}
           <div className="mb-6 md:mb-12 mt-4 md:mt-8">
-            {/* <p className="text-base md:text-5xl font-black md:font-bold mb-3 md:mb-6">
+            <p className="text-base md:text-5xl font-black md:font-bold mb-3 md:mb-6">
               <span className="md:text-red-600" style={{color: 'rgb(223, 17, 17)'}}>IMPORTANT:</span> <span className="text-black">Add The Event To Your Calendar</span>
-            </p> */}
+            </p>
             <p className="text-sm md:text-2xl font-light md:font-normal text-black mb-6 md:mb-8 max-w-4xl mx-auto px-2 md:px-0 leading-tight md:leading-normal -mt-2 md:mt-0">
               To add the event to your calendar you need to go to your email, open the email that says &quot;Invitation from an unknown sender&quot; from an <span className="underline">@annaraight.com</span> domain and click &quot;Add To Calendar&quot;
             </p>
