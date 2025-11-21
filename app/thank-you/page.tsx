@@ -825,62 +825,25 @@ function ConfirmedPageContent() {
               <span className="md:text-red-600" style={{color: 'rgb(223, 17, 17)'}}>IMPORTANT:</span> <span className="text-black">Add The Event To Your Calendar</span>
             </p>
             <p className="text-sm md:text-2xl font-light md:font-normal text-black mb-6 md:mb-8 max-w-4xl mx-auto px-2 md:px-0 leading-tight md:leading-normal -mt-2 md:mt-0">
-              To add the event to your calendar you need to go to your email, open the email that says &quot;Invitation from an unknown sender&quot; from an <span className="underline">@annaraight.com</span> domain and click &quot;Add To Calendar&quot;
+            To add the event to your calendar, open your email, find the message from Anna Raight, and click the &quot;Add To Calendar&quot; button at the bottom
             </p>
             
-            {/* Gmail Screenshot Mockup */}
+            {/* Email Screenshots */}
             <div className="max-w-4xl mx-auto mb-6 md:mb-12">
-              <div className="bg-white border border-gray-300 rounded-lg shadow-sm md:shadow-lg overflow-hidden">
-                <div className="bg-gray-50 px-2 md:px-4 py-2 md:py-3 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 md:space-x-3">
-                      <div className="w-6 h-6 md:w-8 md:h-8 bg-gray-400 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs md:text-sm font-semibold">!</span>
-                      </div>
-                      <div>
-                        <div className="text-xs md:text-sm font-medium text-gray-900">████@annaraight.com</div>
-                        <div className="text-xs text-gray-600">to me ▼</div>
-                      </div>
-                    </div>
-                    <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
-                      <span>2:56 PM (0 minutes ago)</span>
-                      <div className="flex space-x-1">
-                        <button className="p-1">⭐</button>
-                        <button className="p-1">😊</button>
-                        <button className="p-1">↩</button>
-                        <button className="p-1">⋮</button>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-600 md:hidden">2:56 PM</div>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="w-full">
+                  <img
+                    src="/image_0.jpg"
+                    alt="Email screenshot 1"
+                    className="w-full h-auto rounded-lg shadow-lg"
+                  />
                 </div>
-                
-                <div className="p-3 md:p-6 bg-gray-100">
-                  <div className="bg-white rounded-lg p-3 md:p-4 border border-gray-200">
-                    <p className="text-xs md:text-sm text-gray-700 mb-3 md:mb-4">
-                      This event isn&apos;t in your calendar yet. You haven&apos;t interacted with ████@annaraight.com before.<br/>
-                      Do you want to automatically add this and future invitations from them to your calendar?
-                    </p>
-                    <div className="text-center mb-3 md:mb-4">
-                      <p className="text-red-600 text-xs md:text-sm font-semibold">Please click &quot;Add To Calendar&quot;</p>
-                    </div>
-                    <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
-                      <div className="relative">
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 rounded-lg font-medium text-sm md:text-base">
-                          Add to calendar
-                        </button>
-                        <div className="absolute -inset-2 border-2 md:border-4 border-red-500 rounded-full animate-pulse"></div>
-                      </div>
-                      <button className="text-gray-600 hover:text-gray-800 px-4 py-2 text-sm md:text-base">
-                        Report spam
-                      </button>
-                      <div className="hidden md:block ml-auto">
-                        <button className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                          <span className="text-xs">?</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                <div className="w-full">
+                  <img
+                    src="/image_1.jpg"
+                    alt="Email screenshot 2"
+                    className="w-full h-auto rounded-lg shadow-lg"
+                  />
                 </div>
               </div>
             </div>
